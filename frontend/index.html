@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KavachQR - Zero-Touch Dynamic Defense Gateway</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #171717 0%, #1D1D1B 50%, #171717 100%);
+            background-attachment: fixed;
+            color: #F7F5EF;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(212,175,55,.05) 25%, rgba(212,175,55,.05) 26%, transparent 27%, transparent 74%, rgba(212,175,55,.05) 75%, rgba(212,175,55,.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(212,175,55,.05) 25%, rgba(212,175,55,.05) 26%, transparent 27%, transparent 74%, rgba(212,175,55,.05) 75%, rgba(212,175,55,.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 1;
+            animation: gridShift 20s linear infinite;
+            opacity: 0.04;
+        }
+
+        @keyframes gridShift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Radial gradient overlays for premium lighting */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: 75%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(212,175,55,0.16), transparent 35%);
+            pointer-events: none;
+            z-index: 2;
+            animation: floatGlow 8s ease-in-out infinite;
+            filter: blur(100px);
+        }
+
+        @keyframes floatGlow {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -20px); }
+        }
+
+        /* Main content wrapper */
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ============================================
+           NAVBAR
+           ============================================ */
+        .navbar {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1400px;
+            padding: 12px 24px;
+            background: rgba(25, 25, 24, 0.72);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            gap: 40px;
+        }
+
+        .navbar-logo {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8C7028, #D4AF37, #F4DE9A, #B8943E);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-logo::before {
+            content: '🛡️';
+            font-size: 18px;
+            -webkit-text-fill-color: unset;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 32px;
+            flex: 1;
+        }
+
+        .navbar-menu a {
+            font-size: 13px;
+            font-weight: 500;
+            color: #B8B5AC;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .navbar-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #D4AF37, #E5C76B);
+            transition: width 0.4s ease;
+        }
+
+        .navbar-menu a:hover {
+            color: #E5C76B;
+        }
+
+        .navbar-menu a:hover::after {
+            width: 100%;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #B8B5AC;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .navbar-btn {
+            padding: 8px 16px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: #E5C76B;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: rgba(212, 175, 55, 0.6);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        .hero {
+            margin-top: 140px;
+            padding: 80px 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #E5C76B;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .eyebrow-dot {
+            width: 8px;
+            height: 8px;
+            background: #E5C76B;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #E5C76B;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .hero-headline {
+            font-size: clamp(48px, 7vw, 96px);
+            font-weight: 800;
+            line-height: 0.95;
+            margin-bottom: 24px;
+            color: #F7F5EF;
+            letter-spacing: -2px;
+        }
+
+        .hero-headline .gold-accent {
+            background: linear-gradient(135deg, #8C7028, #D4AF37, #F4DE9A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtext {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #B8B5AC;
+            margin-bottom: 32px;
+            max-width: 500px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-hero {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #8C7028, #D4AF37, #F4DE9A, #B8943E);
+            color: #10100F;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 48px rgba(212, 175, 55, 0.5);
+        }
+
+        .btn-primary-hero:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary-hero {
+            padding: 14px 32px;
+            background: rgba(212, 175, 55, 0.05);
+            border: 2px solid rgba(212, 175, 55, 0.4);
+            color: #E5C76B;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-secondary-hero:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: rgba(212, 175, 55, 0.8);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* ============================================
+           HERO VISUAL - QR SECURITY CONTAINER
+           ============================================ */
+        .hero-visual {
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: floatHero 6s ease-in-out infinite;
+        }
+
+        @keyframes floatHero {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Gold particles */
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, #F4DE9A, #D4AF37);
+            border-radius: 50%;
+            animation: particleFloat 8s infinite ease-in-out;
+            opacity: 0;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 0;
+                transform: translateY(0) translateX(0);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-200px) translateX(var(--tx));
+            }
+        }
+
+        /* Security rings */
+        .security-ring {
+            position: absolute;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            animation: rotateRing 20s linear infinite;
+        }
+
+        .security-ring:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            animation: rotateRing 25s linear infinite;
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+
+        .security-ring:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            animation: rotateRingReverse 30s linear infinite;
+            border-color: rgba(212, 175, 55, 0.2);
+        }
+
+        .security-ring:nth-child(3) {
+            width: 500px;
+            height: 500px;
+            animation: rotateRing 35s linear infinite;
+            border-color: rgba(212, 175, 55, 0.1);
+        }
+
+        @keyframes rotateRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateRingReverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        /* Radar sweep */
+        .radar-sweep {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: conic-gradient(from 0deg, rgba(212, 175, 55, 0.4), rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0), rgba(212, 175, 55, 0));
+            border-radius: 50%;
+            animation: radarSweep 5s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes radarSweep {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* QR Container styling */
+        #qrContainer {
+            position: relative;
+            z-index: 10;
+            width: 240px;
+            height: 240px;
+            background: #22211F;
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 
+                0 0 40px rgba(212, 175, 55, 0.2),
+                inset 0 0 20px rgba(212, 175, 55, 0.05);
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 40px rgba(212, 175, 55, 0.2),
+                    inset 0 0 20px rgba(212, 175, 55, 0.05);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 60px rgba(212, 175, 55, 0.35),
+                    inset 0 0 30px rgba(212, 175, 55, 0.1);
+            }
+        }
+
+        #qrContainer img {
+            max-width: 100%;
+            height: auto;
+            image-rendering: crisp-edges;
+        }
+
+        /* Security labels around QR */
+        .qr-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #E5C76B;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .qr-label-secure {
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .qr-label-live {
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .live-indicator {
+            width: 6px;
+            height: 6px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        /* ============================================
+           STATS SECTION
+           ============================================ */
+        .stats-section {
+            margin-top: 80px;
+            padding: 0 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-card {
+            background: rgba(34, 33, 31, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #D4AF37, #F4DE9A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #B8B5AC;
+        }
+
+        /* ============================================
+           MERCHANT SECTION
+           ============================================ */
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 100px;
+            padding: 0 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #F7F5EF;
+            letter-spacing: -1px;
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            padding: 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 32px;
+        }
+
+        .premium-card {
+            background: linear-gradient(135deg, rgba(34, 33, 31, 0.8), rgba(29, 29, 27, 0.6));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 16px;
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .premium-card:hover {
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15);
+            transform: translateY(-8px);
+        }
+
+        .card-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #E5C76B;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #F7F5EF;
+        }
+
+        .card-description {
+            font-size: 13px;
+            color: #B8B5AC;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Timer styling */
+        .timer-display {
+            margin: 24px 0;
+            padding: 20px;
+            background: rgba(212, 175, 55, 0.05);
+            border-left: 3px solid #D4AF37;
+            border-radius: 8px;
+        }
+
+        .timer-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #B8B5AC;
+            margin-bottom: 8px;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        #timerFill {
+            height: 100%;
+            background: linear-gradient(90deg, #8C7028, #D4AF37, #F4DE9A);
+            transition: width 1s linear;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+        }
+
+        #timerText {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            color: #E5C76B;
+        }
+
+        /* Status box styling */
+        .status-badge {
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.4s ease;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #merchantStatus {
+            background: rgba(212, 175, 55, 0.08);
+            color: #E5C76B;
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        #merchantStatus.status-pending {
+            background: rgba(212, 175, 55, 0.08);
+            color: #E5C76B;
+            border-color: rgba(212, 175, 55, 0.3);
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        #merchantStatus.status-verified {
+            background: rgba(74, 222, 128, 0.15);
+            color: #86efac;
+            border-color: rgba(74, 222, 128, 0.4);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+            animation: statusVerified 0.6s ease-out;
+        }
+
+        @keyframes statusVerified {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #merchantStatus.status-blocked {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+            animation: statusShake 0.5s ease-out;
+        }
+
+        @keyframes statusShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Button styles */
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .amount-btn {
+            padding: 12px;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            color: #E5C76B;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .amount-btn:hover {
+            background: linear-gradient(135deg, #8C7028, #D4AF37);
+            color: #10100F;
+            border-color: #D4AF37;
+            box-shadow: 0 0 16px rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 12px;
+        }
+
+        .action-btn-primary {
+            background: linear-gradient(135deg, #8C7028, #D4AF37, #F4DE9A, #B8943E);
+            color: #10100F;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+        }
+
+        .action-btn-primary:hover {
+            box-shadow: 0 12px 36px rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .action-btn-danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.3));
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
+        }
+
+        .action-btn-danger:hover {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(220, 38, 38, 0.5));
+            box-shadow: 0 0 24px rgba(239, 68, 68, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Form inputs */
+        .form-group {
+            margin: 16px 0;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #B8B5AC;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(16, 16, 15, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            color: #E5C76B;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: rgba(212, 175, 55, 0.5);
+            box-shadow: 0 0 16px rgba(212, 175, 55, 0.2);
+            background: rgba(16, 16, 15, 0.95);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            padding: 12px;
+            background: rgba(212, 175, 55, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        .toggle-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #D4AF37;
+        }
+
+        .toggle-container label {
+            font-size: 13px;
+            color: #B8B5AC;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        /* Logs */
+        .log-box {
+            background: rgba(16, 16, 15, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            height: 180px;
+            overflow-y: auto;
+            color: #86efac;
+            margin-top: 20px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .log-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.5), transparent);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .log-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-box::-webkit-scrollbar-track {
+            background: rgba(212, 175, 55, 0.05);
+            border-radius: 3px;
+        }
+
+        .log-box::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.3);
+            border-radius: 3px;
+        }
+
+        .log-box::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 175, 55, 0.5);
+        }
+
+        /* ============================================
+           AGENT CARDS & SECTIONS
+           ============================================ */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .agent-card {
+            background: linear-gradient(135deg, rgba(34, 33, 31, 0.6), rgba(29, 29, 27, 0.5));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .agent-card:hover {
+            border-color: rgba(212, 175, 55, 0.3);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .agent-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .agent-name {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #F7F5EF;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .agent-status {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .agent-status.ready {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        .agent-status.active {
+            background: rgba(212, 175, 55, 0.2);
+            color: #E5C76B;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .agent-status.sandbox {
+            background: rgba(96, 125, 139, 0.2);
+            color: #90caf9;
+            border: 1px solid rgba(96, 125, 139, 0.4);
+        }
+
+        .agent-desc {
+            font-size: 11px;
+            color: #B8B5AC;
+            line-height: 1.4;
+        }
+
+        /* Risk Analysis Panel */
+        .risk-panel {
+            background: linear-gradient(135deg, rgba(34, 33, 31, 0.6), rgba(29, 29, 27, 0.5));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 32px;
+        }
+
+        .risk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .risk-item {
+            background: rgba(16, 16, 15, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .risk-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #B8B5AC;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .risk-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #E5C76B;
+        }
+
+        .risk-meter {
+            width: 100%;
+            height: 8px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .risk-meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #eab308, #ef4444);
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        .risk-level-low { color: #4ade80; }
+        .risk-level-medium { color: #eab308; }
+        .risk-level-high { color: #ef4444; }
+
+        /* Agent Activity Log */
+        .agent-activity-log {
+            background: rgba(16, 16, 15, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            height: 120px;
+            overflow-y: auto;
+            color: #86efac;
+            margin-top: 16px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .agent-activity-log::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.5), transparent);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .agent-activity-log::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .agent-activity-log::-webkit-scrollbar-track {
+            background: rgba(212, 175, 55, 0.03);
+            border-radius: 2px;
+        }
+
+        .agent-activity-log::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.2);
+            border-radius: 2px;
+        }
+
+        .agent-activity-log::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 175, 55, 0.4);
+        }
+
+        /* Evidence Display */
+        .evidence-panel {
+            background: rgba(16, 16, 15, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+
+        .evidence-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.05);
+        }
+
+        .evidence-row:last-child {
+            border-bottom: none;
+        }
+
+        .evidence-label {
+            color: #B8B5AC;
+            font-weight: 600;
+        }
+
+        .evidence-value {
+            color: #E5C76B;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        /* Red Team Button */
+        .action-btn-sandbox {
+            background: linear-gradient(135deg, rgba(96, 125, 139, 0.3), rgba(66, 165, 245, 0.3));
+            color: #90caf9;
+            border: 1px solid rgba(96, 125, 139, 0.4);
+            box-shadow: 0 0 12px rgba(96, 125, 139, 0.2);
+        }
+
+        .action-btn-sandbox:hover {
+            background: linear-gradient(135deg, rgba(96, 125, 139, 0.5), rgba(66, 165, 245, 0.5));
+            box-shadow: 0 0 20px rgba(96, 125, 139, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Collapsible sections */
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #E5C76B;
+            user-select: none;
+        }
+
+        .collapsible-header::after {
+            content: '▼';
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible-header.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .navbar-menu {
+                gap: 16px;
+                font-size: 12px;
+            }
+
+            .navbar-right {
+                gap: 12px;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                padding: 40px 20px;
+                margin-top: 180px;
+            }
+
+            .hero-headline {
+                font-size: 36px;
+            }
+
+            .hero-visual {
+                height: 300px;
+            }
+
+            .section-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 24px;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                * {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content-wrapper">
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="navbar-logo">
+                Kavach<br>QR
+            </div>
+            <div class="navbar-menu">
+                <a href="#security">Security</a>
+                <a href="#how">How It Works</a>
+                <a href="#protection">Protection</a>
+                <a href="#monitor">Live Monitor</a>
+            </div>
+            <div class="navbar-right">
+                <div class="system-status">
+                    <div class="status-indicator"></div>
+                    SYSTEM SECURE
+                </div>
+                <button class="navbar-btn">Dashboard</button>
+            </div>
+        </nav>
+
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-eyebrow">
+                    <span class="eyebrow-dot"></span>
+                    AI-POWERED MULTI-AGENT QR FRAUD DEFENSE
+                </div>
+                <h1 class="hero-headline">
+                    Secure Every<br><span class="gold-accent">QR Payment.</span>
+                </h1>
+                <p class="hero-subtext">
+                    KavachQR combines dynamic QR security with autonomous AI defense agents to protect against spoofing, replay attacks, and fraudulent payment flows in real time.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn-primary-hero" onclick="generateQR(0)">Generate Secure QR</button>
+                    <button class="btn-secondary-hero">Explore Protection</button>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <!-- Security rings -->
+                <div class="security-ring"></div>
+                <div class="security-ring"></div>
+                <div class="security-ring"></div>
+                
+                <!-- Radar sweep -->
+                <div class="radar-sweep"></div>
+
+                <!-- QR Container -->
+                <div id="qrContainer">
+                    <span style="color: #B8B5AC; font-size: 12px;">Initializing...</span>
+                </div>
+
+                <!-- Labels -->
+                <div class="qr-label qr-label-secure">🔒 SECURE SESSION</div>
+                <div class="qr-label qr-label-live"><span class="live-indicator"></span> LIVE</div>
+
+                <!-- Gold particles (CSS animated) -->
+                <div class="particle" style="width: 4px; height: 4px; top: 20%; left: 10%; --tx: -40px; animation-delay: 0s;"></div>
+                <div class="particle" style="width: 3px; height: 3px; top: 30%; left: 15%; --tx: -30px; animation-delay: 1s;"></div>
+                <div class="particle" style="width: 2px; height: 2px; top: 40%; left: 20%; --tx: -50px; animation-delay: 2s;"></div>
+                <div class="particle" style="width: 4px; height: 4px; top: 50%; left: 5%; --tx: -60px; animation-delay: 0.5s;"></div>
+                <div class="particle" style="width: 3px; height: 3px; top: 60%; left: 12%; --tx: -35px; animation-delay: 1.5s;"></div>
+                <div class="particle" style="width: 2px; height: 2px; top: 70%; left: 18%; --tx: -45px; animation-delay: 2.5s;"></div>
+                <div class="particle" style="width: 4px; height: 4px; top: 25%; right: 10%; --tx: 40px; animation-delay: 0.8s;"></div>
+                <div class="particle" style="width: 3px; height: 3px; top: 35%; right: 15%; --tx: 30px; animation-delay: 1.8s;"></div>
+                <div class="particle" style="width: 2px; height: 2px; top: 45%; right: 20%; --tx: 50px; animation-delay: 2.8s;"></div>
+                <div class="particle" style="width: 4px; height: 4px; top: 55%; right: 5%; --tx: 60px; animation-delay: 0.3s;"></div>
+            </div>
+        </section>
+
+        <!-- STATS SECTION -->
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number">Real-Time</div>
+                <div class="stat-label">Threat Detection</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">5</div>
+                <div class="stat-label">Defense Agents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">&lt; 1s</div>
+                <div class="stat-label">Risk Response</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Continuous Protection</div>
+            </div>
+        </section>
+
+        <!-- AI DEFENSE COMMAND CENTER -->
+        <h2 class="section-title" id="agents">AI Defense Command Center</h2>
+        <div style="padding: 0 40px; max-width: 1400px; margin-left: auto; margin-right: auto; margin-top: 16px;">
+            <p style="font-size: 13px; color: #B8B5AC; margin-bottom: 24px;">
+                Autonomous agents analyze every payment session from multiple security perspectives.
+            </p>
+            <div class="agents-grid">
+                <!-- Investigator -->
+                <div class="agent-card">
+                    <div class="agent-icon">🔎</div>
+                    <div class="agent-name">Investigator</div>
+                    <div class="agent-status ready">READY</div>
+                    <div class="agent-desc">Reviews gray-zone transactions and determines risk level.</div>
+                </div>
+
+                <!-- Evidence Compiler -->
+                <div class="agent-card">
+                    <div class="agent-icon">🧾</div>
+                    <div class="agent-name">Evidence Compiler</div>
+                    <div class="agent-status ready">READY</div>
+                    <div class="agent-desc">Collects transaction signals and builds explainable evidence.</div>
+                </div>
+
+                <!-- Ring Detector -->
+                <div class="agent-card">
+                    <div class="agent-icon">🕸️</div>
+                    <div class="agent-name">Ring Detector</div>
+                    <div class="agent-status ready">READY</div>
+                    <div class="agent-desc">Detects shared device fingerprints and suspicious clusters.</div>
+                </div>
+
+                <!-- Red Team -->
+                <div class="agent-card">
+                    <div class="agent-icon">⚔️</div>
+                    <div class="agent-name">Red Team</div>
+                    <div class="agent-status sandbox">SANDBOX</div>
+                    <div class="agent-desc">Simulates adversarial payment attack patterns safely.</div>
+                </div>
+
+                <!-- Session Sync -->
+                <div class="agent-card">
+                    <div class="agent-icon">🔄</div>
+                    <div class="agent-name">Session Sync</div>
+                    <div class="agent-status active">ACTIVE</div>
+                    <div class="agent-desc">Synchronizes transaction sessions with defense pipeline.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MERCHANT SECTION -->
+        <h2 class="section-title" id="security">Merchant Security Console</h2>
+        <div class="section-grid">
+            
+            <!-- MERCHANT CARD -->
+            <div class="premium-card">
+                <span class="card-badge">🔐 Merchant Display (Zero-Touch)</span>
+                <h3 class="card-title">Live QR Session</h3>
+                <p class="card-description">Auto-refreshes dynamic security QR every 30 seconds for trusted payment flows.</p>
+
+                <!-- Timer Display -->
+                <div class="timer-display">
+                    <div class="timer-label">Security Window</div>
+                    <span id="timerText">Refreshing in 30s</span>
+                    <div class="timer-bar">
+                        <div class="timer-bar-fill" id="timerFill"></div>
+                    </div>
+                </div>
+
+                <!-- Status Box -->
+                <div class="status-badge status-pending" id="merchantStatus">
+                    ⏳ WAITING FOR SCAN
+                </div>
+
+                <!-- Toggle -->
+                <div class="toggle-container">
+                    <input type="checkbox" id="autoRefreshToggle" checked onchange="toggleAutoRefresh()">
+                    <label for="autoRefreshToggle">Enable Zero-Touch Auto-Refresh (30s Cycle)</label>
+                </div>
+
+                <!-- Preset Amounts -->
+                <label style="display: block; margin-top: 20px;" class="form-label">Secure Amount Presets:</label>
+                <div class="button-group">
+                    <button class="amount-btn" onclick="generateQR(10)">₹10</button>
+                    <button class="amount-btn" onclick="generateQR(20)">₹20</button>
+                    <button class="amount-btn" onclick="generateQR(50)">₹50</button>
+                </div>
+
+                <button class="action-btn action-btn-primary" onclick="generateQR(0)">Generate New Secure Session</button>
+
+                <!-- Logs -->
+                <div class="log-box" id="merchantLogs">> Merchant display online. Auto-timer initialized.</div>
+            </div>
+
+            <!-- CUSTOMER / SIMULATOR CARD -->
+            <div class="premium-card">
+                <span class="card-badge">⚔️ Threat Simulation Lab</span>
+                <h3 class="card-title">Payment & Attack Testing</h3>
+                <p class="card-description">Test genuine payment flows vs simulated spoof attacks and offline scan attempts.</p>
+
+                <!-- Session ID -->
+                <div class="form-group">
+                    <label class="form-label">Active Session Token</label>
+                    <input type="text" id="activeSessionId" readonly value="NO ACTIVE SESSION">
+                </div>
+
+                <!-- Amount Input -->
+                <div class="form-group">
+                    <label class="form-label">Test Payment Amount (₹)</label>
+                    <input type="number" id="payAmount" value="20">
+                </div>
+
+                <!-- Action Buttons -->
+                <button class="action-btn action-btn-primary" onclick="simulateRealPayment()">✓ Simulate Genuine Payment</button>
+                <button class="action-btn action-btn-danger" onclick="simulateSpoofScan()">🚨 Simulate Spoof Attack</button>
+                <button class="action-btn action-btn-sandbox" onclick="runRedTeamSandbox()">⚔ Run Red-Team Sandbox</button>
+
+                <!-- Logs -->
+                <div class="log-box" id="customerLogs">> Simulator idle. Scan or test payments above.</div>
+            </div>
+
+        </div>
+
+        <!-- LIVE RISK ANALYSIS PANEL -->
+        <h2 class="section-title" id="risk">Live Risk Analysis</h2>
+        <div class="risk-panel" style="margin: 40px auto; max-width: 1400px; margin-left: auto; margin-right: auto; padding: 0 40px;">
+            <div class="risk-grid">
+                <div class="risk-item">
+                    <span class="risk-label">Session</span>
+                    <div class="risk-value" id="riskSession">NO SESSION</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Merchant</span>
+                    <div class="risk-value" id="riskMerchant">—</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Amount</span>
+                    <div class="risk-value" id="riskAmount">—</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Risk Level</span>
+                    <div class="risk-value" id="riskLevelDisplay">—</div>
+                </div>
+            </div>
+
+            <div class="risk-grid" style="margin-top: 20px;">
+                <div class="risk-item">
+                    <span class="risk-label">Spoof Probability</span>
+                    <div class="risk-value" id="riskSpoofProb">—</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Device Fingerprint</span>
+                    <div style="font-size: 12px; color: #E5C76B; word-break: break-all;" id="riskFingerprint">—</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">IP Velocity</span>
+                    <div class="risk-value" id="riskIPVelocity">—</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Classifier Confidence</span>
+                    <div class="risk-value" id="riskConfidence">—</div>
+                </div>
+            </div>
+
+            <div class="risk-grid" style="margin-top: 20px;">
+                <div class="risk-item">
+                    <span class="risk-label">Verdict</span>
+                    <div class="risk-value" id="riskVerdict">—</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Agent Recommendation</span>
+                    <div class="risk-value" id="riskAgentRec">—</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Fraud Ring Analysis</span>
+                    <div style="font-size: 12px; color: #E5C76B;" id="riskRingAnalysis">Not analyzed</div>
+                </div>
+                <div class="risk-item">
+                    <span class="risk-label">Investigation Status</span>
+                    <div style="font-size: 12px; color: #E5C76B;" id="riskInvestigationStatus">Not initiated</div>
+                </div>
+            </div>
+
+            <!-- Risk Meter -->
+            <div style="margin-top: 24px;">
+                <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #B8B5AC; margin-bottom: 12px; letter-spacing: 1px;">Risk Spectrum</div>
+                <div class="risk-meter">
+                    <div class="risk-meter-fill" id="riskMeterFill"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #B8B5AC;">
+                    <span>LOW</span>
+                    <span>MEDIUM</span>
+                    <span>HIGH</span>
+                </div>
+            </div>
+
+            <!-- Evidence Section -->
+            <div style="margin-top: 24px;">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    📋 Evidence Collected
+                </div>
+                <div class="collapsible-content" id="evidenceContent">
+                    <div id="evidenceDisplay" class="evidence-panel">
+                        <div style="color: #B8B5AC; text-align: center; padding: 16px;">Waiting for evidence collection...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fraud Ring Analysis -->
+            <div style="margin-top: 24px;">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    🕸️ Fraud Ring Analysis
+                </div>
+                <div class="collapsible-content" id="ringContent">
+                    <div id="ringDisplay" class="evidence-panel">
+                        <div style="color: #B8B5AC; text-align: center; padding: 16px;">No suspicious cluster detected.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Activity -->
+            <div style="margin-top: 24px;">
+                <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: #B8B5AC; margin-bottom: 12px; letter-spacing: 1px;">Agent Activity Log</div>
+                <div class="agent-activity-log" id="agentActivityLog">> Agents idle. Process a transaction to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+        const ROTATION_SECONDS = 30;
+        
+        let currentSessionId = null;
+        let pollingInterval = null;
+        let countdownInterval = null;
+        let secondsLeft = ROTATION_SECONDS;
+        let autoRefreshEnabled = true;
+        let currentRiskData = {};
+
+        function log(boxId, text) {
+            const box = document.getElementById(boxId);
+            box.innerHTML += `<br>> ${text}`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function agentLog(text, status = '✓') {
+            const box = document.getElementById('agentActivityLog');
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const statusSymbol = status === 'error' ? '✕' : (status === 'pending' ? '⏳' : '✓');
+            box.innerHTML += `<br>[${timestamp}] ${statusSymbol} ${text}`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function toggleCollapsible(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+
+        // Start countdown timer loop
+        function startCountdownTimer() {
+            clearInterval(countdownInterval);
+            secondsLeft = ROTATION_SECONDS;
+            updateTimerUI();
+
+            countdownInterval = setInterval(() => {
+                if (!autoRefreshEnabled) return;
+                
+                secondsLeft--;
+                updateTimerUI();
+
+                if (secondsLeft <= 0) {
+                    log('merchantLogs', `30s Security Window Expired. Auto-Rotating QR...`);
+                    generateQR(0);
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const timerText = document.getElementById('timerText');
+            const timerFill = document.getElementById('timerFill');
+
+            if (!autoRefreshEnabled) {
+                timerText.innerText = "Auto-Refresh Paused";
+                timerFill.style.width = "0%";
+                return;
+            }
+
+            timerText.innerText = `Refreshing in ${secondsLeft}s`;
+            const percentage = (secondsLeft / ROTATION_SECONDS) * 100;
+            timerFill.style.width = `${percentage}%`;
+        }
+
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = document.getElementById('autoRefreshToggle').checked;
+            if (autoRefreshEnabled) {
+                startCountdownTimer();
+            } else {
+                updateTimerUI();
+            }
+        }
+
+        function updateRiskAnalysis(data) {
+            document.getElementById('riskSession').innerText = data.session_id || 'NO SESSION';
+            document.getElementById('riskMerchant').innerText = data.merchant_id || 'M1';
+            document.getElementById('riskAmount').innerText = data.amount ? `₹${data.amount}` : '—';
+            
+            const riskLevel = data.risk_level || 'UNKNOWN';
+            const riskLevelDisplay = document.getElementById('riskLevelDisplay');
+            riskLevelDisplay.innerText = riskLevel;
+            riskLevelDisplay.className = `risk-value risk-level-${riskLevel.toLowerCase()}`;
+            
+            document.getElementById('riskSpoofProb').innerText = data.spoof_probability ? `${(data.spoof_probability * 100).toFixed(1)}%` : '—';
+            document.getElementById('riskFingerprint').innerText = data.device_fingerprint || '—';
+            document.getElementById('riskIPVelocity').innerText = data.ip_velocity || '—';
+            document.getElementById('riskConfidence').innerText = data.classifier_confidence ? `${(data.classifier_confidence * 100).toFixed(1)}%` : '—';
+            document.getElementById('riskVerdict').innerText = data.verdict || '—';
+            document.getElementById('riskAgentRec').innerText = data.agent_recommendation || '—';
+
+            // Update risk meter
+            const spoof = data.spoof_probability || 0;
+            const meterFill = document.getElementById('riskMeterFill');
+            meterFill.style.width = `${Math.min(spoof * 100, 100)}%`;
+
+            currentRiskData = data;
+        }
+
+        function clearRiskAnalysis() {
+            document.getElementById('riskSession').innerText = 'NO SESSION';
+            document.getElementById('riskMerchant').innerText = '—';
+            document.getElementById('riskAmount').innerText = '—';
+            document.getElementById('riskLevelDisplay').innerText = '—';
+            document.getElementById('riskSpoofProb').innerText = '—';
+            document.getElementById('riskFingerprint').innerText = '—';
+            document.getElementById('riskIPVelocity').innerText = '—';
+            document.getElementById('riskConfidence').innerText = '—';
+            document.getElementById('riskVerdict').innerText = '—';
+            document.getElementById('riskAgentRec').innerText = '—';
+            document.getElementById('riskMeterFill').style.width = '0%';
+            document.getElementById('riskInvestigationStatus').innerText = 'Not initiated';
+            document.getElementById('riskRingAnalysis').innerText = 'Not analyzed';
+        }
+
+        async function generateQR(amt) {
+            clearInterval(pollingInterval);
+            document.getElementById('merchantStatus').className = "status-badge status-pending";
+            document.getElementById('merchantStatus').innerText = "⏳ WAITING FOR SCAN";
+            
+            clearRiskAnalysis();
+            document.getElementById('agentActivityLog').innerHTML = '> Session initialized. Awaiting scan...';
+            
+            try {
+                const res = await fetch(`${API_BASE}/generate_qr?amount=${amt}`);
+                currentSessionId = res.headers.get("X-Session-ID");
+                document.getElementById('activeSessionId').value = currentSessionId;
+
+                const blob = await res.blob();
+                const imgUrl = URL.createObjectURL(blob);
+                document.getElementById('qrContainer').innerHTML = `<img src="${imgUrl}" alt="Session QR">`;
+
+                const modeStr = amt > 0 ? `Fixed Amount ₹${amt}` : `Zero-Touch Dynamic`;
+                log('merchantLogs', `Generated [${modeStr}] Session: ${currentSessionId}`);
+                log('customerLogs', `New active token generated: ${currentSessionId}`);
+                
+                agentLog('Session Sync: Session created', 'pending');
+
+                // Reset timer and restart status polling
+                startCountdownTimer();
+                pollingInterval = setInterval(pollStatus, 1000);
+            } catch (err) {
+                log('merchantLogs', `ERROR: Failed connecting to FastAPI server.`);
+                agentLog('Session Sync: Connection failed', 'error');
+            }
+        }
+
+        async function pollStatus() {
+            if (!currentSessionId) return;
+            try {
+                const res = await fetch(`${API_BASE}/merchant_status/${currentSessionId}`);
+                const data = await res.json();
+                
+                const statusBox = document.getElementById('merchantStatus');
+                if (data.status === "VERIFIED") {
+                    statusBox.className = "status-badge status-verified";
+                    statusBox.innerText = `✓ SETTLED: ₹${data.settled_amount} IN BANK LEDGER`;
+                    clearInterval(pollingInterval);
+                } else if (data.status === "SPOOF_BLOCKED") {
+                    statusBox.className = "status-badge status-blocked";
+                    statusBox.innerText = "🚨 ALERT: SPOOF APP ATTEMPT BLOCKED";
+                    clearInterval(pollingInterval);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function simulateRealPayment() {
+            if (!currentSessionId) return alert("No active session! Wait for QR generation.");
+            const amt = document.getElementById('payAmount').value;
+            log('customerLogs', `Simulating payment scan for ₹${amt}...`);
+            agentLog('Scan recorded: Genuine payment flow', 'pending');
+            
+            try {
+                await fetch(`${API_BASE}/scan/${currentSessionId}`);
+                
+                const res = await fetch(`${API_BASE}/mock_bank_webhook`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ session_id: currentSessionId, status: "SUCCESS", amount: amt })
+                });
+                const data = await res.json();
+                log('customerLogs', `Bank Webhook Fired: ₹${data.amount} Settled under token ${currentSessionId}`);
+                agentLog('Bank Webhook: Transaction settled', 'pending');
+
+                // Update risk analysis with payment data
+                updateRiskAnalysis({
+                    session_id: currentSessionId,
+                    merchant_id: 'M1',
+                    amount: parseInt(amt),
+                    risk_level: 'LOW',
+                    spoof_probability: 0.05,
+                    verdict: 'ALLOW',
+                    classifier_confidence: 0.95
+                });
+
+                // Trigger dispute/evidence compiler for analysis
+                await triggerEvidenceCompiler();
+                
+            } catch (err) {
+                agentLog('Payment simulation failed', 'error');
+                console.error(err);
+            }
+        }
+
+        async function simulateSpoofScan() {
+            if (!currentSessionId) return alert("No active session! Wait for QR generation.");
+            log('customerLogs', `Simulating offline spoof app scan attack...`);
+            agentLog('Spoof attack detected: ML gateway analyzing', 'pending');
+            
+            try {
+                const res = await fetch(`${API_BASE}/scan/${currentSessionId}`, {
+                    headers: { "User-Agent": "curl/7.68.0" }
+                });
+                
+                if (res.status === 403) {
+                    const data = await res.json();
+                    log('customerLogs', `ML GATEWAY BLOCKED ATTACK: ${data.error}`);
+                    agentLog('Investigator: Spoof probability HIGH', 'pending');
+
+                    // Update risk analysis with spoof data
+                    updateRiskAnalysis({
+                        session_id: currentSessionId,
+                        merchant_id: 'M1',
+                        amount: parseInt(document.getElementById('payAmount').value),
+                        risk_level: 'HIGH',
+                        spoof_probability: data.spoof_probability || 0.85,
+                        verdict: 'BLOCK',
+                        agent_recommendation: 'BLOCK - Likely spoof app',
+                        classifier_confidence: data.spoof_probability || 0.85
+                    });
+
+                    agentLog('Verdict: BLOCKED - Suspicious user agent', 'pending');
+                } else {
+                    log('customerLogs', `Scan recorded...`);
+                }
+            } catch (err) {
+                agentLog('Spoof simulation error', 'error');
+                console.error(err);
+            }
+        }
+
+        async function triggerEvidenceCompiler() {
+            if (!currentSessionId) return;
+            
+            try {
+                agentLog('Evidence Compiler: Collecting transaction signals', 'pending');
+                const res = await fetch(`${API_BASE}/dispute/${currentSessionId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ reason: "Analysis triggered by payment flow" })
+                });
+                const data = await res.json();
+                
+                if (data.status === "queued") {
+                    agentLog('Evidence Compiler: Collection queued', 'pending');
+                    
+                    // Poll for evidence
+                    setTimeout(async () => {
+                        try {
+                            const evidenceRes = await fetch(`${API_BASE}/agent/evidence/${currentSessionId}`);
+                            const evidenceData = await evidenceRes.json();
+                            
+                            if (evidenceData.status === 'ready' && evidenceData.evidence) {
+                                agentLog('Evidence Compiler: Evidence ready', 'pending');
+                                displayEvidence(evidenceData.evidence);
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }, 1000);
+                }
+            } catch (err) {
+                agentLog('Evidence Compiler: Endpoint unavailable', 'error');
+            }
+        }
+
+        async function triggerInvestigator() {
+            if (!currentSessionId) return;
+            
+            try {
+                agentLog('Investigator: Analyzing gray-zone transaction', 'pending');
+                const res = await fetch(`${API_BASE}/agent/investigation/${currentSessionId}`);
+                const data = await res.json();
+                
+                if (data.status === 'ready') {
+                    agentLog('Investigator: Analysis complete', 'pending');
+                    document.getElementById('riskInvestigationStatus').innerText = `${data.risk_level || 'MEDIUM'} Risk`;
+                    
+                    if (data.verdict_submission) {
+                        const rec = data.verdict_submission.verdict;
+                        document.getElementById('riskAgentRec').innerText = rec.recommendation || '—';
+                    }
+                } else {
+                    document.getElementById('riskInvestigationStatus').innerText = 'Analysis in progress...';
+                }
+            } catch (err) {
+                agentLog('Investigator: Endpoint unavailable', 'error');
+            }
+        }
+
+        async function triggerRingDetector() {
+            try {
+                agentLog('Ring Detector: Analyzing device fingerprints', 'pending');
+                const res = await fetch(`${API_BASE}/agent/ring-detector`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                
+                if (data.result) {
+                    agentLog('Ring Detector: Analysis complete', 'pending');
+                    displayRingAnalysis(data.result);
+                }
+            } catch (err) {
+                agentLog('Ring Detector: Endpoint unavailable', 'error');
+            }
+        }
+
+        async function runRedTeamSandbox() {
+            if (!currentSessionId) {
+                alert("No active session! Generate a QR first.");
+                return;
+            }
+
+            const sandboxMerchantId = "SANDBOX_" + Math.random().toString(36).substr(2, 9).toUpperCase();
+            
+            try {
+                agentLog('Red Team: Initiating sandbox attack simulation', 'pending');
+                const res = await fetch(`${API_BASE}/agent/red-team/${sandboxMerchantId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                
+                if (data.result) {
+                    agentLog('Red Team: Sandbox attack pattern generated', 'pending');
+                    log('customerLogs', `Red Team Sandbox Active: Strategy=${data.result.strategy}, Pattern=${data.result.pattern_id}`);
+                    
+                    alert(`Red Team Sandbox Results:\nStrategy: ${data.result.strategy}\nPattern: ${data.result.pattern_id}\nStatus: SAFE - Sandbox Environment`);
+                }
+            } catch (err) {
+                agentLog('Red Team: Endpoint unavailable or invalid merchant format', 'error');
+                alert("Red Team Sandbox: Endpoint unavailable. Ensure backend is running.");
+            }
+        }
+
+        function displayEvidence(evidenceList) {
+            if (!evidenceList || evidenceList.length === 0) {
+                document.getElementById('evidenceDisplay').innerHTML = '<div style="color: #B8B5AC; text-align: center; padding: 16px;">No evidence available.</div>';
+                return;
+            }
+
+            let html = '';
+            evidenceList.forEach(ev => {
+                html += `<div class="evidence-row">
+                    <div class="evidence-label">${ev.field || ev.name}</div>
+                    <div class="evidence-value">${ev.value}</div>
+                </div>`;
+            });
+
+            document.getElementById('evidenceDisplay').innerHTML = html;
+        }
+
+        function displayRingAnalysis(result) {
+            if (!result.clusters || result.clusters.length === 0) {
+                document.getElementById('ringDisplay').innerHTML = '<div style="color: #B8B5AC; text-align: center; padding: 16px;">No suspicious cluster detected.</div>';
+                document.getElementById('riskRingAnalysis').innerText = 'No clusters detected';
+                return;
+            }
+
+            const cluster = result.clusters[0];
+            let html = `<div class="evidence-row">
+                <div class="evidence-label">Sessions Analyzed</div>
+                <div class="evidence-value">${result.sessions_analyzed || 0}</div>
+            </div>
+            <div class="evidence-row">
+                <div class="evidence-label">Clusters Detected</div>
+                <div class="evidence-value">${result.clusters.length}</div>
+            </div>
+            <div class="evidence-row">
+                <div class="evidence-label">Cluster ID</div>
+                <div class="evidence-value">${cluster.cluster_id || '—'}</div>
+            </div>
+            <div class="evidence-row">
+                <div class="evidence-label">Device Fingerprint</div>
+                <div class="evidence-value">${cluster.fingerprint || '—'}</div>
+            </div>
+            <div class="evidence-row">
+                <div class="evidence-label">Sessions in Ring</div>
+                <div class="evidence-value">${cluster.session_ids ? cluster.session_ids.length : 0}</div>
+            </div>
+            <div class="evidence-row">
+                <div class="evidence-label">Cohesion Score</div>
+                <div class="evidence-value">${cluster.cohesion_score ? (cluster.cohesion_score * 100).toFixed(1) + '%' : '—'}</div>
+            </div>`;
+
+            document.getElementById('ringDisplay').innerHTML = html;
+            document.getElementById('riskRingAnalysis').innerText = `${result.clusters.length} cluster(s) detected`;
+        }
+
+        // Initialize display automatically on page load
+        window.onload = () => {
+            generateQR(0);
+        };
+    </script>
+</body>
+</html>
