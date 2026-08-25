@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KavachQR Secure Payment</title>
+    <style>
+        :root { font-family: Arial, sans-serif; color: #17201d; background: #edf2ec; }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; }
+        main { width: min(88vw, 380px); padding: 28px; background: #fff; border: 1px solid #d6dfd5; border-radius: 12px; box-shadow: 0 18px 50px #17201d18; }
+        .brand { color: #16734b; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        h1 { margin: 36px 0 8px; font: 700 30px Georgia, serif; }
+        p { color: #64716a; line-height: 1.5; }
+        .row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #e5ebe4; }
+        .label { color: #64716a; }
+        .value { font-weight: 700; }
+        button { width: 100%; margin-top: 28px; padding: 15px; border: 0; border-radius: 8px; background: #16734b; color: #fff; font-weight: 700; font-size: 15px; }
+    </style>
+</head>
+<body>
+<main>
+    <div class="brand">KavachQR</div>
+    <h1>Secure Payment</h1>
+    <p>Continue in your trusted UPI app to complete this payment.</p>
+    <div class="row"><span class="label">Merchant</span><span class="value" id="merchant">KavachQR Merchant</span></div>
+    <div class="row"><span class="label">Amount</span><span class="value" id="amount">As entered in UPI</span></div>
+    <div class="row"><span class="label">Secure Session</span><span class="value">Verified by KavachQR</span></div>
+    <button id="continue">Continue to UPI Payment</button>
+</main>
+<script>
+const sessionId = location.pathname.split('/').pop();
+const apiBase = `${location.protocol}//${location.host}`;
+document.getElementById('continue').addEventListener('click', () => {
+    fetch(`${apiBase}/scan/${encodeURIComponent(sessionId)}`, { redirect: 'manual' })
+        .then(response => {
+            if (response.type === 'opaqueredirect' || response.status === 302) return;
+            throw new Error('Payment could not be verified');
+        })
+        .catch(() => { document.querySelector('p').textContent = 'Payment could not be verified.'; });
+});
+</script>
+</body>
+</html>
