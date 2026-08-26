@@ -768,23 +768,10 @@
             animation: statusShake 0.5s ease-out;
         }
 
-        #merchantStatus.status-investigating {
-            background: rgba(212, 175, 55, 0.08);
-            color: #E5C76B;
-            border-color: rgba(212, 175, 55, 0.3);
-            animation: statusPulse 1.2s ease-in-out infinite;
-        }
-
         @keyframes statusShake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
-        }
-
-        .inspection-note {
-            font-size: 12px;
-            color: #B8B5AC;
-            line-height: 1.5;
         }
 
         /* Button styles */
@@ -851,13 +838,6 @@
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(220, 38, 38, 0.5));
             box-shadow: 0 0 24px rgba(239, 68, 68, 0.4);
             transform: translateY(-2px);
-        }
-
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
 
         /* Form inputs */
@@ -966,37 +946,6 @@
             background: rgba(212, 175, 55, 0.5);
         }
 
-        .sandbox-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .sandbox-row {
-            background: rgba(212, 175, 55, 0.04);
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            border-radius: 10px;
-            padding: 10px 12px;
-        }
-
-        .sandbox-label {
-            display: block;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #B8B5AC;
-            margin-bottom: 4px;
-        }
-
-        .sandbox-value {
-            font-size: 13px;
-            color: #E5C76B;
-            font-weight: 600;
-            word-break: break-word;
-        }
-
         /* ============================================
            AGENT CARDS & SECTIONS
            ============================================ */
@@ -1064,35 +1013,6 @@
             background: rgba(96, 125, 139, 0.2);
             color: #90caf9;
             border: 1px solid rgba(96, 125, 139, 0.4);
-        }
-
-        .agent-status.queued {
-            background: rgba(212, 175, 55, 0.14);
-            color: #E5C76B;
-            border: 1px solid rgba(212, 175, 55, 0.35);
-        }
-
-        .agent-status.analyzing {
-            background: rgba(59, 130, 246, 0.12);
-            color: #93c5fd;
-            border: 1px solid rgba(59, 130, 246, 0.4);
-        }
-
-        .agent-status.completed {
-            background: rgba(34, 197, 94, 0.15);
-            color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.38);
-        }
-
-        .agent-status.offline {
-            background: rgba(239, 68, 68, 0.12);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.36);
-        }
-
-        .agent-card.is-active {
-            border-color: rgba(212, 175, 55, 0.45);
-            box-shadow: 0 0 18px rgba(212, 175, 55, 0.12);
         }
 
         .agent-desc {
@@ -1363,7 +1283,7 @@
             <div class="navbar-right">
                 <div class="system-status">
                     <div class="status-indicator"></div>
-                    SYSTEM SECURE
+                    <span id="connectivityStatus">CLIENT CONNECTIVITY</span>
                 </div>
                 <button class="navbar-btn">Dashboard</button>
             </div>
@@ -1438,10 +1358,6 @@
                 <div class="stat-number">24/7</div>
                 <div class="stat-label">Continuous Protection</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="ringAlertCount">0</div>
-                <div class="stat-label">Active Ring Alerts (Network)</div>
-            </div>
         </section>
 
         <!-- AI DEFENSE COMMAND CENTER -->
@@ -1452,51 +1368,43 @@
             </p>
             <div class="agents-grid">
                 <!-- Investigator -->
-                <div class="agent-card" id="agentInvestigatorCard" data-agent="investigator" onclick="handleAgentCardClick('investigator')">
+                <div class="agent-card" onclick="triggerInvestigator()">
                     <div class="agent-icon">🔎</div>
                     <div class="agent-name">Investigator</div>
-                    <div class="agent-status ready" id="agentInvestigatorStatus">READY</div>
-                    <div class="agent-desc" id="agentInvestigatorMeta">Waiting for gray-zone transaction</div>
+                    <div class="agent-status ready">READY</div>
+                    <div class="agent-desc">Reviews gray-zone transactions and determines risk level.</div>
                 </div>
 
                 <!-- Evidence Compiler -->
-                <div class="agent-card" id="agentEvidenceCard" data-agent="evidence" onclick="handleAgentCardClick('evidence')">
+                <div class="agent-card" onclick="triggerEvidenceCompiler()">
                     <div class="agent-icon">🧾</div>
                     <div class="agent-name">Evidence Compiler</div>
-                    <div class="agent-status ready" id="agentEvidenceStatus">READY</div>
-                    <div class="agent-desc" id="agentEvidenceMeta">Waiting for evidence request</div>
+                    <div class="agent-status ready">READY</div>
+                    <div class="agent-desc">Collects transaction signals and builds explainable evidence.</div>
                 </div>
 
                 <!-- Ring Detector -->
-                <div class="agent-card" id="agentRingCard" data-agent="ring" onclick="handleAgentCardClick('ring')">
+                <div class="agent-card" onclick="triggerRingDetector()">
                     <div class="agent-icon">🕸️</div>
                     <div class="agent-name">Ring Detector</div>
-                    <div class="agent-status ready" id="agentRingStatus">READY</div>
-                    <div class="agent-desc" id="agentRingMeta">No suspicious cluster checked yet</div>
+                    <div class="agent-status ready">READY</div>
+                    <div class="agent-desc">Detects shared device fingerprints and suspicious clusters.</div>
                 </div>
 
                 <!-- Red Team -->
-                <div class="agent-card" id="agentRedTeamCard" data-agent="redteam" onclick="handleAgentCardClick('redteam')">
+                <div class="agent-card" onclick="runRedTeamSandbox()">
                     <div class="agent-icon">⚔️</div>
                     <div class="agent-name">Red Team</div>
-                    <div class="agent-status sandbox" id="agentRedTeamStatus">SANDBOX</div>
-                    <div class="agent-desc" id="agentRedTeamMeta">Sandbox-only operational mode</div>
+                    <div class="agent-status sandbox">SANDBOX</div>
+                    <div class="agent-desc">Simulates adversarial payment attack patterns safely.</div>
                 </div>
 
                 <!-- Session Sync -->
-                <div class="agent-card" id="agentSessionCard" data-agent="session" onclick="handleAgentCardClick('session')">
+                <div class="agent-card" onclick="triggerCopilot()">
                     <div class="agent-icon">🔄</div>
                     <div class="agent-name">Session Sync</div>
-                    <div class="agent-status active" id="agentSessionStatus">ACTIVE</div>
-                    <div class="agent-desc" id="agentSessionMeta">Waiting for active QR session</div>
-                </div>
-
-                <!-- Merchant Copilot -->
-                <div class="agent-card" id="agentCopilotCard" data-agent="copilot" onclick="handleAgentCardClick('copilot')">
-                    <div class="agent-icon">🧭</div>
-                    <div class="agent-name">Merchant Copilot</div>
-                    <div class="agent-status ready" id="agentCopilotStatus">READY</div>
-                    <div class="agent-desc" id="agentCopilotMeta">Waiting for merchant analysis</div>
+                    <div class="agent-status active">ACTIVE</div>
+                    <div class="agent-desc">Synchronizes transaction sessions with defense pipeline.</div>
                 </div>
             </div>
         </div>
@@ -1525,12 +1433,6 @@
                     ⏳ WAITING FOR SCAN
                 </div>
 
-                <div
-                    class="status-badge"
-                    id="copilotAlert"
-                    style="display:none; background: rgba(239,68,68,0.1); color:#fca5a5; border-color: rgba(239,68,68,0.3); margin-top: 0;">
-                </div>
-
                 <!-- Toggle -->
                 <div class="toggle-container">
                     <input type="checkbox" id="autoRefreshToggle" checked onchange="toggleAutoRefresh()">
@@ -1546,6 +1448,7 @@
                 </div>
 
                 <button class="action-btn action-btn-primary" onclick="generateQR(0)">Generate New Secure Session</button>
+                <a id="customerDisplayLink" class="action-btn action-btn-secondary" href="customer-display.html" target="_blank">Open Customer Display</a>
 
                 <!-- Logs -->
                 <div class="log-box" id="merchantLogs">> Merchant display online. Auto-timer initialized.</div>
@@ -1576,45 +1479,6 @@
 
                 <!-- Logs -->
                 <div class="log-box" id="customerLogs">> Simulator idle. Scan or test payments above.</div>
-            </div>
-
-            <div class="premium-card">
-                <span class="card-badge">🕵️ Investigator & Evidence Agents</span>
-                <h3 class="card-title">AI Reasoning Log</h3>
-                <p class="card-description">When a scan lands in the gray zone, the Investigator Agent explains its reasoning here. Blocked or disputed sessions can be compiled into an evidence packet.</p>
-                <div class="log-box" id="investigationLog">> No active investigation.</div>
-                <button
-                    class="action-btn action-btn-primary"
-                    id="evidenceBtn"
-                    onclick="requestEvidencePacket()"
-                    disabled>
-                    📄 Compile Evidence Packet
-                </button>
-            </div>
-
-            <div class="premium-card">
-                <span class="card-badge">🧪 Red Team Sandbox</span>
-                <h3 class="card-title">Sandbox Intelligence</h3>
-                <p class="card-description">Deterministic red-team analysis for merchant-specific attack simulation patterns.</p>
-                <div class="sandbox-grid">
-                    <div class="sandbox-row">
-                        <span class="sandbox-label">Status</span>
-                        <div class="sandbox-value" id="sandboxStatus">READY</div>
-                    </div>
-                    <div class="sandbox-row">
-                        <span class="sandbox-label">Merchant</span>
-                        <div class="sandbox-value" id="sandboxMerchant">SANDBOX_M1</div>
-                    </div>
-                    <div class="sandbox-row">
-                        <span class="sandbox-label">Strategy</span>
-                        <div class="sandbox-value" id="sandboxStrategy">TIMING JITTER</div>
-                    </div>
-                    <div class="sandbox-row">
-                        <span class="sandbox-label">Pattern</span>
-                        <div class="sandbox-value" id="sandboxPattern">—</div>
-                    </div>
-                </div>
-                <button class="action-btn action-btn-primary" id="sandboxBtn" onclick="runRedTeamSandbox()">🧪 Run Sandbox Test</button>
             </div>
 
         </div>
@@ -1725,134 +1589,35 @@
     </div>
 
     <script>
-        const resolveApiBase = () => {
-            const fromWindow = window.KAVACH_CONFIG && window.KAVACH_CONFIG.apiBase;
-            const fromStorage = localStorage.getItem('KAVACH_API_BASE');
-            if (fromWindow || fromStorage) return fromWindow || fromStorage;
-
-            const protocol = window.location.protocol || 'http:';
-            const hostname = window.location.hostname || 'localhost';
-            return `${protocol}//${hostname}:8000`;
-        };
-
-        const API_BASE = resolveApiBase();
-        const MERCHANT_ID = "M1";
+        const API_BASE = window.KAVACH_API_BASE || localStorage.getItem('KAVACH_API_BASE') || "http://localhost:8000";
+        const MERCHANT_ID = localStorage.getItem('KAVACH_MERCHANT_ID') || 'MERCHANT_001';
         const ROTATION_SECONDS = 30;
-        const RING_DETECTOR_ENDPOINT_AVAILABLE = true;
-        const COPILOT_ALERT_ENDPOINT_AVAILABLE = true;
         
         let currentSessionId = null;
-        let activeSessionId = null;
         let pollingInterval = null;
-        let investigationPollingInterval = null;
-        let copilotPollingInterval = null;
-        let ringPollingInterval = null;
         let countdownInterval = null;
         let secondsLeft = ROTATION_SECONDS;
         let autoRefreshEnabled = true;
         let currentRiskData = {};
-        let merchantSocket = null;
 
         function log(boxId, text) {
             const box = document.getElementById(boxId);
-            if (!box) return;
             box.innerHTML += `<br>> ${text}`;
             box.scrollTop = box.scrollHeight;
         }
 
         function agentLog(text, status = '✓') {
             const box = document.getElementById('agentActivityLog');
-            if (!box) return;
             const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
             const statusSymbol = status === 'error' ? '✕' : (status === 'pending' ? '⏳' : '✓');
             box.innerHTML += `<br>[${timestamp}] ${statusSymbol} ${text}`;
             box.scrollTop = box.scrollHeight;
         }
 
-        function setAgentCardState(agentName, statusText, metaText, statusClass = 'ready') {
-            const statusEl = document.getElementById(`agent${agentName.charAt(0).toUpperCase() + agentName.slice(1)}Status`);
-            const metaEl = document.getElementById(`agent${agentName.charAt(0).toUpperCase() + agentName.slice(1)}Meta`);
-            const cardEl = document.getElementById(`agent${agentName.charAt(0).toUpperCase() + agentName.slice(1)}Card`);
-
-            if (statusEl) {
-                statusEl.className = `agent-status ${statusClass}`;
-                statusEl.innerText = statusText;
-            }
-
-            if (metaEl) metaEl.innerText = metaText;
-            if (cardEl) cardEl.classList.toggle('is-active', statusText !== 'READY' && statusText !== 'SANDBOX');
-        }
-
-        function handleAgentCardClick(agent) {
-            if (!activeSessionId) {
-                const labelMap = {
-                    investigator: 'Investigator',
-                    evidence: 'Evidence Compiler',
-                    ring: 'Ring Detector',
-                    redteam: 'Red Team',
-                    session: 'Session Sync',
-                    copilot: 'Merchant Copilot'
-                };
-                const name = labelMap[agent] || 'Agent';
-                if (agent === 'investigator') setAgentCardState('investigator', 'READY', 'No active QR session. Generate a Secure QR first.', 'offline');
-                if (agent === 'evidence') setAgentCardState('evidence', 'READY', 'No active QR session. Generate a Secure QR first.', 'offline');
-                if (agent === 'ring') setAgentCardState('ring', 'READY', 'No active QR session. Generate a Secure QR first.', 'offline');
-                if (agent === 'redteam') setAgentCardState('redteam', 'SANDBOX', 'Sandbox is available only after a secure QR session is active.', 'sandbox');
-                if (agent === 'session') setAgentCardState('session', 'OFFLINE', 'No active QR session. Generate a Secure QR first.', 'offline');
-                if (agent === 'copilot') setAgentCardState('copilot', 'READY', 'No active QR session. Generate a Secure QR first.', 'offline');
-                log('customerLogs', `${name}: No active QR session. Generate a Secure QR first.`);
-                return;
-            }
-
-            if (agent === 'investigator') {
-                setAgentCardState('investigator', 'QUEUED', `Checking investigation for ${activeSessionId}`, 'queued');
-                fetchInvestigationForActiveSession();
-            }
-
-            if (agent === 'evidence') {
-                setAgentCardState('evidence', 'QUEUED', `Compiling evidence for ${activeSessionId}`, 'queued');
-                requestEvidencePacket();
-            }
-
-            if (agent === 'ring') {
-                setAgentCardState('ring', 'ANALYZING', `Reviewing ring clusters for ${activeSessionId}`, 'analyzing');
-                triggerRingDetector();
-            }
-
-            if (agent === 'redteam') {
-                setAgentCardState('redteam', 'RUNNING', 'Running sandbox attack pattern against SANDBOX_M1', 'analyzing');
-                runRedTeamSandbox();
-            }
-
-            if (agent === 'session') {
-                setAgentCardState('session', 'ACTIVE', `Syncing ${activeSessionId}`, 'active');
-                pollStatus();
-            }
-
-            if (agent === 'copilot') {
-                setAgentCardState('copilot', 'ANALYZING', 'Running merchant analysis', 'analyzing');
-                pollCopilot().then(() => setAgentCardState('copilot', 'COMPLETE', 'Merchant analysis complete', 'completed'))
-                    .catch(() => setAgentCardState('copilot', 'ERROR', 'Copilot failed. Check backend logs.', 'offline'));
-            }
-        }
-
         function toggleCollapsible(header) {
             header.classList.toggle('collapsed');
             const content = header.nextElementSibling;
             content.classList.toggle('collapsed');
-        }
-
-        function clearSessionTimers() {
-            clearInterval(pollingInterval);
-            clearInterval(investigationPollingInterval);
-            clearInterval(copilotPollingInterval);
-            clearInterval(ringPollingInterval);
-            clearInterval(countdownInterval);
-            pollingInterval = null;
-            investigationPollingInterval = null;
-            copilotPollingInterval = null;
-            ringPollingInterval = null;
-            countdownInterval = null;
         }
 
         // Start countdown timer loop
@@ -1898,33 +1663,6 @@
             }
         }
 
-        function connectMerchantSocket() {
-            const apiUrl = new URL(API_BASE);
-            const protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
-            merchantSocket = new WebSocket(`${protocol}//${apiUrl.host}/ws/merchant/${encodeURIComponent(MERCHANT_ID)}`);
-            merchantSocket.onmessage = event => {
-                const data = JSON.parse(event.data);
-                if (data.session_id && data.session_id !== activeSessionId) return;
-                if (data.event === 'SCAN_RECEIVED') {
-                    agentLog(`Gateway: Scan received in ${data.scan_time_delta}s`, 'pending');
-                    document.getElementById('merchantStatus').innerText = '🔍 ANALYZING PAYMENT';
-                }
-                if (data.event === 'THREAT_ANALYSIS' || data.event === 'SPOOF_BLOCKED') {
-                    updateRiskAnalysis(data);
-                    pollStatus();
-                }
-                if (data.event === 'PAYMENT_SETTLED') {
-                    pollStatus();
-                    agentLog('Bank: Mock settlement received', '✓');
-                }
-                if (data.event === 'SESSION_EXPIRED') {
-                    document.getElementById('merchantStatus').innerText = 'SESSION EXPIRED';
-                    setAgentCardState('session', 'OFFLINE', 'Server-side security window expired', 'offline');
-                }
-            };
-            merchantSocket.onclose = () => setTimeout(connectMerchantSocket, 2000);
-        }
-
         function updateRiskAnalysis(data) {
             document.getElementById('riskSession').innerText = data.session_id || 'NO SESSION';
             document.getElementById('riskMerchant').innerText = data.merchant_id || 'M1';
@@ -1967,285 +1705,90 @@
         }
 
         async function generateQR(amt) {
-            clearSessionTimers();
-            currentSessionId = null;
-            activeSessionId = null;
-
+            clearInterval(pollingInterval);
             document.getElementById('merchantStatus').className = "status-badge status-pending";
             document.getElementById('merchantStatus').innerText = "⏳ WAITING FOR SCAN";
             
             clearRiskAnalysis();
             document.getElementById('agentActivityLog').innerHTML = '> Session initialized. Awaiting scan...';
-            document.getElementById('investigationLog').innerHTML = '> No active investigation.';
-            document.getElementById('evidenceBtn').disabled = true;
-            document.getElementById('copilotAlert').style.display = 'none';
-            document.getElementById('copilotAlert').innerText = '';
-            document.getElementById('ringAlertCount').innerText = '0';
-            document.getElementById('sandboxStatus').innerText = 'READY';
-            document.getElementById('sandboxMerchant').innerText = 'SANDBOX_M1';
-            document.getElementById('sandboxStrategy').innerText = 'TIMING JITTER';
-            document.getElementById('sandboxPattern').innerText = '—';
-            setAgentCardState('investigator', 'READY', 'Waiting for gray-zone transaction', 'ready');
-            setAgentCardState('evidence', 'READY', 'Waiting for evidence request', 'ready');
-            setAgentCardState('ring', 'READY', 'No suspicious cluster checked yet', 'ready');
-            setAgentCardState('redteam', 'SANDBOX', 'Sandbox-only operational mode', 'sandbox');
-            setAgentCardState('session', 'ACTIVE', 'Waiting for active QR session', 'active');
-            setAgentCardState('copilot', 'READY', 'Waiting for merchant analysis', 'ready');
             
             try {
-                const res = await fetch(`${API_BASE}/generate_qr?amount=${amt}`);
-                if (!res.ok) throw new Error(`QR generation failed: ${res.status}`);
-
-                currentSessionId = res.headers.get("X-Session-ID");
-                activeSessionId = currentSessionId;
+                const res = await fetch(`${API_BASE}/merchant/session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ merchant_id: MERCHANT_ID, amount: amt > 0 ? amt : 50 })
+                });
+                if (!res.ok) throw new Error((await res.json()).detail || 'Session creation failed');
+                const session = await res.json();
+                currentSessionId = session.session_id;
                 document.getElementById('activeSessionId').value = currentSessionId;
-
-                const blob = await res.blob();
-                const imgUrl = URL.createObjectURL(blob);
-                document.getElementById('qrContainer').innerHTML = `<img src="${imgUrl}" alt="Session QR">`;
+                document.getElementById('customerDisplayLink').href = `customer-display.html?session_id=${encodeURIComponent(currentSessionId)}`;
+                document.getElementById('qrContainer').innerHTML = `<img src="${API_BASE}/merchant/session/${currentSessionId}/qr" alt="Session QR">`;
 
                 const modeStr = amt > 0 ? `Fixed Amount ₹${amt}` : `Zero-Touch Dynamic`;
                 log('merchantLogs', `Generated [${modeStr}] Session: ${currentSessionId}`);
                 log('customerLogs', `New active token generated: ${currentSessionId}`);
                 
                 agentLog('Session Sync: Session created', 'pending');
-                setAgentCardState('session', 'ACTIVE', `Syncing ${activeSessionId}`, 'active');
 
+                // Reset timer and restart status polling
                 startCountdownTimer();
                 pollingInterval = setInterval(pollStatus, 1000);
-                investigationPollingInterval = setInterval(pollInvestigation, 2000);
-                if (COPILOT_ALERT_ENDPOINT_AVAILABLE) {
-                    copilotPollingInterval = setInterval(pollCopilot, 15000);
-                }
-                if (RING_DETECTOR_ENDPOINT_AVAILABLE) {
-                    ringPollingInterval = setInterval(pollRingDetector, 15000);
-                }
             } catch (err) {
-                console.error('QR generation error:', err);
-                log('merchantLogs', 'ERROR: Failed connecting to FastAPI server.');
-                setAgentCardState('session', 'OFFLINE', 'FastAPI offline or unreachable', 'offline');
+                log('merchantLogs', `ERROR: Failed connecting to FastAPI server.`);
                 agentLog('Session Sync: Connection failed', 'error');
             }
         }
 
         async function pollStatus() {
-            if (!activeSessionId && !currentSessionId) return;
-            const sessionId = activeSessionId || currentSessionId;
+            if (!currentSessionId) return;
             try {
-                const res = await fetch(`${API_BASE}/merchant_status/${sessionId}`);
-                if (!res.ok) {
-                    setAgentCardState('session', 'OFFLINE', 'Session sync lost or API unavailable', 'offline');
-                    return;
-                }
+                const res = await fetch(`${API_BASE}/merchant_status/${currentSessionId}`);
                 const data = await res.json();
+                updateRiskAnalysis(data);
                 
                 const statusBox = document.getElementById('merchantStatus');
-                updateRiskAnalysis({
-                    session_id: data.session_id,
-                    merchant_id: data.merchant_id,
-                    amount: data.expected_amount,
-                    spoof_probability: data.spoof_probability,
-                    classifier_confidence: data.spoof_probability,
-                    scan_time_delta: data.scan_time_delta,
-                    ip_request_velocity: data.ip_request_velocity,
-                    user_agent_score: data.user_agent_score,
-                    verdict: data.status === 'SPOOF_BLOCKED' ? 'SPOOF' : data.status === 'PAYMENT_PENDING' ? 'GENUINE' : undefined
-                });
                 if (data.status === "VERIFIED") {
                     statusBox.className = "status-badge status-verified";
                     statusBox.innerText = `✓ SETTLED: ₹${data.settled_amount} IN BANK LEDGER`;
                     clearInterval(pollingInterval);
-                    setAgentCardState('session', 'ACTIVE', `Session ${sessionId} verified`, 'completed');
                 } else if (data.status === "SPOOF_BLOCKED") {
                     statusBox.className = "status-badge status-blocked";
                     statusBox.innerText = "🚨 ALERT: SPOOF APP ATTEMPT BLOCKED";
                     clearInterval(pollingInterval);
-                    setAgentCardState('session', 'ACTIVE', `Session ${sessionId} blocked`, 'offline');
-                } else if (data.status === "INVESTIGATING") {
-                    statusBox.className = "status-badge status-investigating";
-                    statusBox.innerText = "🔍 UNDER AI REVIEW";
-                    setAgentCardState('session', 'ACTIVE', `Session ${sessionId} under investigation`, 'active');
-                } else {
-                    setAgentCardState('session', 'ACTIVE', `Syncing ${sessionId}`, 'active');
                 }
             } catch (err) {
-                console.error("Status polling error:", err);
-                setAgentCardState('session', 'OFFLINE', 'FastAPI offline or session is unavailable', 'offline');
-            }
-        }
-
-        async function pollInvestigation() {
-            if (!activeSessionId && !currentSessionId) return;
-            const sessionId = activeSessionId || currentSessionId;
-
-            try {
-                const res = await fetch(`${API_BASE}/agent/investigation/${sessionId}`);
-                if (res.status !== 200) return;
-
-                const data = await res.json();
-                const logBox = document.getElementById('investigationLog');
-                const evidenceBtn = document.getElementById('evidenceBtn');
-
-                if (!data || !data.verdict_submission || !data.verdict_submission.verdict) {
-                    logBox.innerHTML = '> No active investigation.';
-                    evidenceBtn.disabled = true;
-                    setAgentCardState('investigator', 'READY', 'Waiting for gray-zone transaction', 'ready');
-                    return;
-                }
-
-                const verdict = data.verdict_submission.verdict;
-                const explanation = verdict.explanation || data.explanation || 'Gray-zone transaction reviewed by Investigator Agent.';
-                const recommendation = verdict.recommendation || data.recommendation || '—';
-                const confidence = verdict.confidence ?? data.confidence ?? '—';
-
-                setAgentCardState('investigator', 'COMPLETED', `Investigation complete for ${sessionId}`, 'completed');
-                logBox.innerHTML = `> ${explanation}<br>> Recommendation: ${recommendation}<br>> Confidence: ${confidence}`;
-                evidenceBtn.disabled = false;
-            } catch (err) {
-                console.error("Investigation polling error:", err);
-            }
-        }
-
-        async function fetchInvestigationForActiveSession() {
-            if (!activeSessionId && !currentSessionId) return;
-            const sessionId = activeSessionId || currentSessionId;
-            try {
-                const res = await fetch(`${API_BASE}/agent/investigation/${sessionId}`);
-                const data = await res.json();
-                if (data && data.verdict_submission && data.verdict_submission.verdict) {
-                    const verdict = data.verdict_submission.verdict;
-                    const logBox = document.getElementById('investigationLog');
-                    logBox.innerHTML = `> ${verdict.explanation}<br>> Recommendation: ${verdict.recommendation}<br>> Confidence: ${verdict.confidence}`;
-                    document.getElementById('evidenceBtn').disabled = false;
-                    setAgentCardState('investigator', 'COMPLETED', `Investigation complete for ${sessionId}`, 'completed');
-                } else {
-                    setAgentCardState('investigator', 'QUEUED', `Investigation queued for ${sessionId}`, 'queued');
-                    document.getElementById('investigationLog').innerHTML = '> No active investigation.';
-                }
-            } catch (err) {
-                console.error('Investigation fetch error:', err);
-                setAgentCardState('investigator', 'OFFLINE', 'Investigator API unavailable', 'offline');
-            }
-        }
-
-        async function requestEvidencePacket() {
-            if (!activeSessionId && !currentSessionId) return;
-            const sessionId = activeSessionId || currentSessionId;
-
-            const logBox = document.getElementById('investigationLog');
-            setAgentCardState('evidence', 'QUEUED', `Compiling evidence for ${sessionId}`, 'queued');
-
-            try {
-                const res = await fetch(
-                    `${API_BASE}/dispute/${sessionId}`,
-                    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason: "Merchant disputes the payment decision" }) }
-                );
-
-                if (!res.ok) {
-                    throw new Error(`Evidence request failed with status ${res.status}`);
-                }
-
-                const data = await res.json();
-
-                if (data && data.status === 'queued') {
-                    logBox.innerHTML += '<br>> Evidence request queued — evidence compilation has been triggered for this session.';
-                    log('customerLogs', 'Evidence compilation queued for dispute review.');
-                } else {
-                    logBox.innerHTML += '<br>> Evidence request accepted — review the dispute workflow for packet generation.';
-                }
-
-                const evidenceRes = await fetch(`${API_BASE}/agent/evidence/${sessionId}`);
-                if (evidenceRes.ok) {
-                    const evidenceData = await evidenceRes.json();
-                    const packet = evidenceData.packet || evidenceData;
-                    if (packet) {
-                        const evidenceText = [];
-                        if (packet.status) evidenceText.push(`Status: ${packet.status}`);
-                        if (packet.reason) evidenceText.push(`Reason: ${packet.reason}`);
-                        if (packet.summary) evidenceText.push(`Summary: ${packet.summary}`);
-                        if (packet.dispute_reason) evidenceText.push(`Dispute Reason: ${packet.dispute_reason}`);
-                        if (packet.generated_at) evidenceText.push(`Generated At: ${packet.generated_at}`);
-                        if (packet.timeline) evidenceText.push(`Timeline: ${packet.timeline.length} event(s)`);
-                        logBox.innerHTML += `<br>> ${evidenceText.join('<br>> ')}`;
-                        setAgentCardState('evidence', 'COMPLETED', `Evidence packet ready for ${sessionId}`, 'completed');
-                    }
-                }
-            } catch (err) {
-                console.error("Evidence packet error:", err);
-                logBox.innerHTML += '<br>> ERROR: Unable to generate evidence packet.';
-                setAgentCardState('evidence', 'OFFLINE', 'Evidence API unavailable', 'offline');
-            }
-        }
-
-        async function pollCopilot() {
-            if (!COPILOT_ALERT_ENDPOINT_AVAILABLE) {
-                const el = document.getElementById('copilotAlert');
-                if (el) {
-                    el.style.display = 'none';
-                }
-                return;
-            }
-
-            try {
-                const res = await fetch(`${API_BASE}/agent/copilot/${MERCHANT_ID}`, { method: "POST" });
-
-                if (!res.ok) return;
-
-                const data = await res.json();
-                const el = document.getElementById('copilotAlert');
-                const message = data?.result?.recommendation || data?.message || (data?.notifications && data.notifications[0] ? data.notifications[0].message : '');
-
-                if (el && message) {
-                    el.style.display = 'block';
-                    el.innerText = `⚠️ ${message}`;
-                } else if (el) {
-                    el.style.display = 'none';
-                }
-            } catch (err) {
-                console.error("Copilot polling error:", err);
-            }
-        }
-
-        async function pollRingDetector() {
-            if (!RING_DETECTOR_ENDPOINT_AVAILABLE) {
-                document.getElementById('ringAlertCount').innerText = '0';
-                return;
-            }
-
-            try {
-                const res = await fetch(`${API_BASE}/agent/ring-detector`, { method: "POST" });
-
-                if (!res.ok) return;
-
-                const data = await res.json();
-                const count = data && data.result && data.result.clusters ? data.result.clusters.length : 0;
-                document.getElementById('ringAlertCount').innerText = String(count);
-            } catch (err) {
-                console.error("Ring detector polling error:", err);
+                console.error(err);
             }
         }
 
         async function simulateRealPayment() {
-            if (!activeSessionId) return alert("No active session! Wait for QR generation.");
+            if (!currentSessionId) return alert("No active session! Wait for QR generation.");
             const amt = document.getElementById('payAmount').value;
             log('customerLogs', `Simulating payment scan for ₹${amt}...`);
-            agentLog('Test request: Passing through the real scan pipeline', 'pending');
+            agentLog('Scan recorded: Genuine payment flow', 'pending');
             
             try {
-                const scanResponse = await fetch(`${API_BASE}/scan/${activeSessionId}`, { redirect: 'manual' });
-                if (scanResponse.status !== 302 && scanResponse.type !== 'opaqueredirect') {
-                    throw new Error('Backend did not approve the scan for payment intent');
+                const scanResponse = await fetch(`${API_BASE}/scan/${currentSessionId}`, { redirect: 'manual' });
+                if (scanResponse.status !== 0 && scanResponse.status !== 302) {
+                    const scanError = await scanResponse.json().catch(() => ({}));
+                    throw new Error(scanError.error || 'Scan was rejected');
                 }
                 
                 const res = await fetch(`${API_BASE}/mock_bank_webhook`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ session_id: activeSessionId, status: "SUCCESS", amount: amt })
+                    body: JSON.stringify({ session_id: currentSessionId, status: "SUCCESS", amount: amt })
                 });
                 const data = await res.json();
-                log('customerLogs', `Mock Bank Settlement: ₹${data.amount} under token ${activeSessionId}`);
+                log('customerLogs', `Bank Webhook Fired: ₹${data.amount} Settled under token ${currentSessionId}`);
                 agentLog('Bank Webhook: Transaction settled', 'pending');
-                await pollStatus();
+
+                // Update risk analysis with payment data
+                updateRiskAnalysis(await (await fetch(`${API_BASE}/merchant_status/${currentSessionId}`)).json());
+
+                // Trigger dispute/evidence compiler for analysis
+                await triggerEvidenceCompiler();
                 
             } catch (err) {
                 agentLog('Payment simulation failed', 'error');
@@ -2254,19 +1797,28 @@
         }
 
         async function simulateSpoofScan() {
-            if (!activeSessionId) return alert("No active session! Wait for QR generation.");
-            log('customerLogs', `SANDBOX / SIMULATION: suspicious signals sent to backend...`);
-            agentLog('Sandbox attack started: real analysis pipeline', 'pending');
+            if (!currentSessionId) return alert("No active session! Wait for QR generation.");
+            log('customerLogs', `Simulating offline spoof app scan attack...`);
+            agentLog('Spoof attack detected: ML gateway analyzing', 'pending');
             
             try {
-                const res = await fetch(`${API_BASE}/agent/demo/spoof-test/${activeSessionId}`, { method: 'POST' });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Spoof simulation failed');
-                updateRiskAnalysis(data);
-                log('customerLogs', `SANDBOX RESULT: ${data.verdict} (${data.risk_level})`);
-                agentLog(`SPOOF TEST: ${data.status}`, 'pending');
+                const res = await fetch(`${API_BASE}/scan/${currentSessionId}`, {
+                    headers: { "User-Agent": "curl/7.68.0" }
+                });
+                
+                if (res.status === 403) {
+                    const data = await res.json();
+                    log('customerLogs', `ML GATEWAY BLOCKED ATTACK: ${data.error}`);
+                    agentLog('Investigator: Spoof probability HIGH', 'pending');
+
+                    const statusResponse = await fetch(`${API_BASE}/merchant_status/${currentSessionId}`);
+                    updateRiskAnalysis(await statusResponse.json());
+
+                    agentLog('Verdict: BLOCKED - Suspicious user agent', 'pending');
+                } else {
+                    log('customerLogs', `Scan recorded...`);
+                }
             } catch (err) {
-                log('customerLogs', `ERROR: ${err.message}`);
                 agentLog('Spoof simulation error', 'error');
                 console.error(err);
             }
@@ -2312,7 +1864,7 @@
             
             try {
                 agentLog('Investigator: Analyzing gray-zone transaction', 'pending');
-                const res = await fetch(`${API_BASE}/agent/investigation/${currentSessionId}`);
+                const res = await fetch(`${API_BASE}/agent/investigation/${currentSessionId}`, { method: 'POST' });
                 const data = await res.json();
                 
                 if (data.status === 'ready') {
@@ -2340,28 +1892,35 @@
                 });
                 const data = await res.json();
                 
-                if (data && data.result) {
-                    setAgentCardState('ring', 'COMPLETED', 'Ring analysis complete', 'completed');
+                if (data.result) {
                     agentLog('Ring Detector: Analysis complete', 'pending');
                     displayRingAnalysis(data.result);
-                    if (data.proposals && data.proposals.length) {
-                        document.getElementById('ringDisplay').innerHTML += `<div class="evidence-row"><div class="evidence-label">Proposals</div><div class="evidence-value">${data.proposals.length}</div></div>`;
-                    }
-                } else {
-                    setAgentCardState('ring', 'READY', 'No suspicious cluster detected', 'ready');
                 }
             } catch (err) {
-                console.error('Ring Detector error:', err);
-                setAgentCardState('ring', 'OFFLINE', 'Ring detector API unavailable', 'offline');
                 agentLog('Ring Detector: Endpoint unavailable', 'error');
             }
         }
 
+        async function triggerCopilot() {
+            try {
+                agentLog('Merchant Copilot: Running activity review', 'pending');
+                const res = await fetch(`${API_BASE}/agent/copilot/${MERCHANT_ID}`, { method: 'POST' });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Copilot failed');
+                agentLog(`Merchant Copilot: ${data.status.toUpperCase()}`, 'pending');
+                log('merchantLogs', `Copilot result: ${JSON.stringify(data.result)}`);
+            } catch (err) {
+                agentLog(`Merchant Copilot failed: ${err.message}`, 'error');
+            }
+        }
+
         async function runRedTeamSandbox() {
+            if (!currentSessionId) {
+                alert("No active session! Generate a QR first.");
+                return;
+            }
+
             const sandboxMerchantId = "SANDBOX_M1";
-            setAgentCardState('redteam', 'RUNNING', 'Running sandbox pattern against SANDBOX_M1', 'analyzing');
-            document.getElementById('sandboxStatus').innerText = 'RUNNING';
-            document.getElementById('sandboxMerchant').innerText = sandboxMerchantId;
             
             try {
                 agentLog('Red Team: Initiating sandbox attack simulation', 'pending');
@@ -2371,23 +1930,15 @@
                 });
                 const data = await res.json();
                 
-                if (data && data.result) {
-                    const result = data.result.result || data.result;
-                    document.getElementById('sandboxStatus').innerText = 'COMPLETED';
-                    document.getElementById('sandboxMerchant').innerText = data.sandbox_merchant_id || sandboxMerchantId;
-                    document.getElementById('sandboxStrategy').innerText = (result && result.strategy) ? result.strategy.toUpperCase() : 'TIMING JITTER';
-                    document.getElementById('sandboxPattern').innerText = (result && result.pattern_id) ? result.pattern_id : '—';
-                    setAgentCardState('redteam', 'COMPLETED', `Red team sandbox complete for ${sandboxMerchantId}`, 'completed');
+                if (data.result) {
                     agentLog('Red Team: Sandbox attack pattern generated', 'pending');
-                    log('customerLogs', `Red Team Sandbox Active: Strategy=${(result && result.strategy) ? result.strategy : 'TIMING JITTER'}, Pattern=${(result && result.pattern_id) ? result.pattern_id : '—'}`);
-                } else {
-                    setAgentCardState('redteam', 'SANDBOX', 'Sandbox result unavailable', 'sandbox');
+                    log('customerLogs', `Red Team Sandbox Active: Strategy=${data.result.strategy}, Pattern=${data.result.pattern_id}`);
+                    
+                    log('customerLogs', `Red Team result: ${JSON.stringify(data.result)}`);
                 }
             } catch (err) {
-                console.error('Red Team sandbox error:', err);
-                setAgentCardState('redteam', 'OFFLINE', 'Red team API unavailable', 'offline');
-                document.getElementById('sandboxStatus').innerText = 'OFFLINE';
                 agentLog('Red Team: Endpoint unavailable or invalid merchant format', 'error');
+                alert("Red Team Sandbox: Endpoint unavailable. Ensure backend is running.");
             }
         }
 
@@ -2445,10 +1996,32 @@
             document.getElementById('riskRingAnalysis').innerText = `${result.clusters.length} cluster(s) detected`;
         }
 
+        function connectMerchantSocket() {
+            const protocol = API_BASE.startsWith('https') ? 'wss' : 'ws';
+            const socket = new WebSocket(`${protocol}://${new URL(API_BASE).host}/ws/merchant/${MERCHANT_ID}`);
+            socket.onmessage = event => {
+                const data = JSON.parse(event.data);
+                if (data.session_id === currentSessionId) {
+                    updateRiskAnalysis(data);
+                    const statusBox = document.getElementById('merchantStatus');
+                    statusBox.innerText = data.status || data.event;
+                    agentLog(`${data.event}: ${data.status || 'received'}`, 'pending');
+                }
+            };
+            socket.onclose = () => { agentLog('WebSocket disconnected. Reconnecting...', 'error'); setTimeout(connectMerchantSocket, 2000); };
+        }
+
+        function updateConnectivity() {
+            const label = document.getElementById('connectivityStatus');
+            label.innerText = navigator.onLine ? 'CLIENT CONNECTIVITY: ONLINE' : 'OFFLINE / DEGRADED MODE';
+        }
+        window.addEventListener('online', updateConnectivity);
+        window.addEventListener('offline', updateConnectivity);
+
         // Initialize display automatically on page load
         window.onload = () => {
             connectMerchantSocket();
-            generateQR(0);
+            generateQR(50);
         };
     </script>
 </body>

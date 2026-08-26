@@ -1,83 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>KavachQR Customer Display</title>
-    <style>
-        :root { color-scheme: dark; font-family: Georgia, serif; }
-        body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #10191a; color: #f4f0df; }
-        main { width: min(92vw, 620px); text-align: center; }
-        .brand { color: #f3c969; letter-spacing: .18em; text-transform: uppercase; font: 700 14px Arial, sans-serif; }
-        h1 { font-size: clamp(38px, 8vw, 72px); margin: 20px 0 8px; }
-        .subtitle { color: #b8c2bc; font: 16px Arial, sans-serif; }
-        #qr { width: min(72vw, 360px); aspect-ratio: 1; margin: 36px auto 24px; display: grid; place-items: center; background: #fff; border: 12px solid #fff; }
-        #qr img { width: 100%; height: 100%; image-rendering: crisp-edges; }
-        .timer { color: #f3c969; font: 700 22px Arial, sans-serif; }
-        #status { margin-top: 24px; color: #b8c2bc; font: 15px Arial, sans-serif; }
-        .verified { color: #8be0a5 !important; }
-        .blocked { color: #ff9a8d !important; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KavachQR | Scan to Pay</title>
+  <style>
+    :root { color-scheme: dark; font-family: Georgia, 'Times New Roman', serif; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #101817; color: #f4f0df; }
+    main { width: min(92vw, 440px); text-align: center; padding: 36px 24px; }
+    h1 { margin: 0; color: #e7bd58; letter-spacing: .08em; font-size: 2rem; }
+    h2 { font-size: 1.1rem; font-weight: 400; margin: 10px 0 28px; color: #c5c9b8; }
+    #qr { display: grid; place-items: center; min-height: 280px; background: #fff; border: 8px solid #fff; }
+    #qr img { width: 100%; max-width: 280px; image-rendering: pixelated; }
+    .amount { font-size: 2rem; margin: 28px 0 12px; }
+    .window, #status { color: #c5c9b8; }
+    #status { margin-top: 18px; }
+    .alert { color: #f07e6e; }
+  </style>
 </head>
 <body>
-<main>
-    <div class="brand">KavachQR</div>
-    <h1>Scan to Pay</h1>
-    <div class="subtitle">Secure payment window</div>
-    <div id="qr"><span>Waiting for QR...</span></div>
-    <div id="amount" class="subtitle">Amount: --</div>
-    <div class="timer" id="timer">Security Window: -- seconds</div>
+  <main>
+    <h1>KAVACHQR</h1>
+    <h2>Scan to Pay</h2>
+    <div id="qr"><span>Loading secure session...</span></div>
+    <div class="amount" id="amount">Amount: --</div>
+    <div class="window" id="window">Security Window: -- seconds</div>
     <div id="status">Waiting for payment...</div>
-</main>
-<script>
-const API_BASE = window.KAVACH_CONFIG?.apiBase || `${location.protocol}//${location.hostname}:8000`;
-const MERCHANT_ID = new URLSearchParams(location.search).get('merchant_id') || 'M1';
-let sessionId = null;
-let expiresAt = 0;
-let socket = null;
-
-function showStatus(text, className = '') {
-    const status = document.getElementById('status');
-    status.textContent = text;
-    status.className = className;
-}
-
-async function loadSession() {
-    const response = await fetch(`${API_BASE}/merchant_session/${MERCHANT_ID}`);
-    const data = await response.json();
-    sessionId = data.session_id;
-    expiresAt = data.expires_at;
-    document.getElementById('amount').textContent = data.amount > 0 ? `Amount: ₹${Number(data.amount).toFixed(2)}` : 'Amount: As entered in UPI';
-    const qrResponse = await fetch(`${API_BASE}/generate_qr?merchant_id=${encodeURIComponent(MERCHANT_ID)}&amount=0`);
-    const blob = await qrResponse.blob();
-    const image = document.createElement('img');
-    image.src = URL.createObjectURL(blob);
-    image.alt = 'KavachQR secure payment QR';
-    const qr = document.getElementById('qr');
-    qr.replaceChildren(image);
-    showStatus('Waiting for payment...');
-}
-
-function connectSocket() {
-    const url = new URL(API_BASE);
-    socket = new WebSocket(`${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}/ws/merchant/${encodeURIComponent(MERCHANT_ID)}`);
-    socket.onmessage = event => {
-        const data = JSON.parse(event.data);
-        if (data.session_id && data.session_id !== sessionId) return;
-        if (data.event === 'PAYMENT_SETTLED') showStatus(`Payment Verified  ${Number(data.settled_amount).toFixed(2)}`, 'verified');
-        if (data.event === 'SPOOF_BLOCKED') showStatus('Payment Blocked  Security verification failed.', 'blocked');
-        if (data.event === 'SESSION_CREATED') loadSession().catch(() => showStatus('Unable to load secure session.'));
-    };
-    socket.onclose = () => setTimeout(connectSocket, 2000);
-}
-
-setInterval(() => {
-    const remaining = Math.max(0, Math.ceil(expiresAt - Date.now() / 1000));
-    document.getElementById('timer').textContent = `Security Window: ${remaining} seconds`;
-    if (remaining === 0) loadSession().catch(() => showStatus('Waiting for secure session...'));
-}, 1000);
-loadSession().catch(() => showStatus('Unable to connect to KavachQR gateway.'));
-connectSocket();
-</script>
+  </main>
+  <script>
+    const API_BASE = window.KAVACH_API_BASE || localStorage.getItem('KAVACH_API_BASE') || 'http://localhost:8000';
+    let sessionId = new URLSearchParams(location.search).get('session_id');
+    let timer;
+    async function loadSession() {
+      if (!sessionId) throw new Error('Open this display from a merchant-created session.');
+      const response = await fetch(`${API_BASE}/customer/session/${encodeURIComponent(sessionId)}`);
+      if (!response.ok) throw new Error((await response.json()).detail || 'Unable to load payment session');
+      const session = await response.json();
+      document.getElementById('amount').textContent = `Amount: ₹${Number(session.amount).toFixed(2)}`;
+      document.getElementById('qr').innerHTML = `<img src="${API_BASE}/merchant/session/${sessionId}/qr" alt="Secure KavachQR payment QR">`;
+      timer = setInterval(() => {
+        const seconds = Math.max(0, Math.floor((new Date(session.expires_at).getTime() - Date.now()) / 1000));
+        document.getElementById('window').textContent = `Security Window: ${seconds} seconds`;
+        if (!seconds) { clearInterval(timer); followNextSession().catch(showError); }
+      }, 1000);
+    }
+    async function followNextSession() {
+      const response = await fetch(`${API_BASE}/customer/session/${encodeURIComponent(sessionId)}/next`);
+      if (!response.ok) throw new Error('Waiting for the merchant dashboard to create a new session.');
+      const next = await response.json();
+      sessionId = next.session_id;
+      history.replaceState(null, '', `?session_id=${encodeURIComponent(sessionId)}`);
+      await loadSession();
+    }
+    function showError(error) { document.getElementById('status').textContent = error.message; document.getElementById('status').className = 'alert'; }
+    loadSession().catch(showError);
+  </script>
 </body>
 </html>

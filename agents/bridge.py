@@ -52,12 +52,16 @@ def _safe_call(function, *args, **kwargs):
 def sync_scan(
     session_id: str,
     session_data: Dict[str, Any],
+    **metadata: Any,
 ) -> Dict[str, Any]:
     """
     Copies the current FastAPI session into the agent store.
 
     This keeps the agent layer separate from the payment gateway.
     """
+
+    session_data = dict(session_data)
+    session_data.update(metadata)
 
     result = _safe_call(
         sync_fastapi_session,
@@ -113,11 +117,11 @@ def run_investigator_gray_zone(
     spoof_probability = float(spoof_probability)
 
     if spoof_probability >= 0.65:
-        risk_level = "HIGH"
+        risk_level = "escalate_to_merchant"
     elif spoof_probability >= 0.35:
-        risk_level = "MEDIUM"
+        risk_level = "soft_flag"
     else:
-        risk_level = "LOW"
+        risk_level = "clear"
 
     investigation = {
         "agent": "investigator",
