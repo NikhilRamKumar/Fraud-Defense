@@ -1447,8 +1447,13 @@
                     <button class="amount-btn" onclick="generateQR(50)">₹50</button>
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label" for="customerAmount">Customer QR Amount (₹)</label>
+                    <input type="number" id="customerAmount" value="50" min="1" max="100000" step="0.01">
+                </div>
+
                 <button class="action-btn action-btn-primary" onclick="generateQR(0)">Generate New Secure Session</button>
-                <a id="customerDisplayLink" class="action-btn action-btn-secondary" href="customer-display.html" target="_blank">Open Customer Display</a>
+                <a id="customerDisplayLink" class="action-btn action-btn-secondary" href="customer-display.html" target="_blank" onclick="prepareCustomerDisplayLink(event)">Open Customer QR</a>
 
                 <!-- Logs -->
                 <div class="log-box" id="merchantLogs">> Merchant display online. Auto-timer initialized.</div>
@@ -1589,7 +1594,8 @@
     </div>
 
     <script>
-        const API_BASE = window.KAVACH_API_BASE || localStorage.getItem('KAVACH_API_BASE') || "http://localhost:8000";
+        const configuredApiBase = new URLSearchParams(window.location.search).get('api_base');
+        const API_BASE = window.KAVACH_API_BASE || localStorage.getItem('KAVACH_API_BASE') || configuredApiBase || (window.location.hostname ? `${window.location.protocol}//${window.location.hostname}:8000` : '');
         const MERCHANT_ID = localStorage.getItem('KAVACH_MERCHANT_ID') || 'MERCHANT_001';
         const ROTATION_SECONDS = 30;
         
@@ -1722,7 +1728,7 @@
                 const session = await res.json();
                 currentSessionId = session.session_id;
                 document.getElementById('activeSessionId').value = currentSessionId;
-                document.getElementById('customerDisplayLink').href = `customer-display.html?session_id=${encodeURIComponent(currentSessionId)}`;
+                updateCustomerDisplayLink(session.amount);
                 document.getElementById('qrContainer').innerHTML = `<img src="${API_BASE}/merchant/session/${currentSessionId}/qr" alt="Session QR">`;
 
                 const modeStr = amt > 0 ? `Fixed Amount ₹${amt}` : `Zero-Touch Dynamic`;
@@ -2009,6 +2015,23 @@
                 }
             };
             socket.onclose = () => { agentLog('WebSocket disconnected. Reconnecting...', 'error'); setTimeout(connectMerchantSocket, 2000); };
+        }
+
+        function updateCustomerDisplayLink(amount) {
+            const link = document.getElementById('customerDisplayLink');
+            const params = new URLSearchParams({ merchant_id: MERCHANT_ID, amount: String(amount || 50) });
+            if (API_BASE) params.set('api_base', API_BASE);
+            link.href = `customer-display.html?${params.toString()}`;
+        }
+
+        function prepareCustomerDisplayLink(event) {
+            const amount = Number(document.getElementById('customerAmount').value || 50);
+            if (!Number.isFinite(amount) || amount <= 0 || amount > 100000) {
+                event.preventDefault();
+                agentLog('Customer QR amount must be between ₹1 and ₹100000', 'error');
+                return;
+            }
+            updateCustomerDisplayLink(amount);
         }
 
         function updateConnectivity() {

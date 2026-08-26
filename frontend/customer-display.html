@@ -10,50 +10,151 @@
     main { width: min(92vw, 440px); text-align: center; padding: 36px 24px; }
     h1 { margin: 0; color: #e7bd58; letter-spacing: .08em; font-size: 2rem; }
     h2 { font-size: 1.1rem; font-weight: 400; margin: 10px 0 28px; color: #c5c9b8; }
+    .merchant { color: #f4f0df; font-size: 1.25rem; margin-bottom: 8px; }
+    .verification { color: #8bd3a8; font-size: .9rem; line-height: 1.6; }
     #qr { display: grid; place-items: center; min-height: 280px; background: #fff; border: 8px solid #fff; }
     #qr img { width: 100%; max-width: 280px; image-rendering: pixelated; }
     .amount { font-size: 2rem; margin: 28px 0 12px; }
     .window, #status { color: #c5c9b8; }
     #status { margin-top: 18px; }
+    #status { white-space: pre-line; }
+    .verified { color: #8bd3a8; }
     .alert { color: #f07e6e; }
+    #retry { display: none; margin: 18px auto 0; padding: 10px 18px; border: 1px solid #e7bd58; background: transparent; color: #e7bd58; cursor: pointer; }
   </style>
 </head>
 <body>
   <main>
     <h1>KAVACHQR</h1>
+    <div class="merchant" id="businessName">Verified merchant</div>
+    <div class="verification" id="bankDetails">Loading verified bank...</div>
     <h2>Scan to Pay</h2>
     <div id="qr"><span>Loading secure session...</span></div>
     <div class="amount" id="amount">Amount: --</div>
     <div class="window" id="window">Security Window: -- seconds</div>
     <div id="status">Waiting for payment...</div>
+    <button id="retry" type="button" onclick="createSession().catch(showError)">Retry secure session</button>
   </main>
   <script>
-    const API_BASE = window.KAVACH_API_BASE || localStorage.getItem('KAVACH_API_BASE') || 'http://localhost:8000';
-    let sessionId = new URLSearchParams(location.search).get('session_id');
-    let timer;
-    async function loadSession() {
-      if (!sessionId) throw new Error('Open this display from a merchant-created session.');
-      const response = await fetch(`${API_BASE}/customer/session/${encodeURIComponent(sessionId)}`);
+    const params = new URLSearchParams(location.search);
+    const merchantId = params.get('merchant_id');
+    const requestedAmount = Number(params.get('amount'));
+    const configuredApiBase = params.get('api_base');
+    const API_BASE = window.KAVACH_API_BASE || localStorage.getItem('KAVACH_API_BASE') || configuredApiBase || (window.location.hostname ? `${window.location.protocol}//${window.location.hostname}:8000` : '');
+    let sessionId = null;
+    let expiresAt = null;
+    let countdownTimer = null;
+    let socket = null;
+    let reconnectTimer = null;
+    let reconnectEnabled = true;
+    let socketConnecting = false;
+
+    function showStatus(message, className = '') {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = className;
+    }
+
+    function displaySession(session) {
+      sessionId = session.session_id;
+
+  // Backend returns Unix timestamp in seconds
+      expiresAt = Number(session.expires_at) * 1000;
+
+      document.getElementById('businessName').textContent =
+      session.business_name || 'Verified merchant';
+
+      document.getElementById('bankDetails').textContent =
+      `Verified Bank: ${session.bank_name} | Account ending ••••${session.account_last4}`;
+
+      document.getElementById('amount').textContent =
+      `₹${Number(session.amount).toFixed(2)}`;
+
+    // IMPORTANT:
+    // qr_url from backend is the scan destination.
+    // The image itself comes from /merchant/session/{session_id}/qr
+      const qrImageUrl =
+        `${API_BASE}/merchant/session/${session.session_id}/qr?t=${Date.now()}`;
+
+      document.getElementById('qr').innerHTML =
+      `<img src="${qrImageUrl}" alt="Secure KavachQR payment QR">`;
+
+      showStatus('Waiting for payment...');
+      startCountdown();
+    }
+
+    async function createSession() {
+      if (!merchantId) throw new Error('Missing verified merchant identity.');
+      if (!API_BASE) throw new Error('Set KAVACH_API_BASE or open this page from a web server.');
+      const amount = Number.isFinite(requestedAmount) && requestedAmount > 0 ? requestedAmount : 50;
+      clearInterval(countdownTimer);
+      document.getElementById('retry').style.display = 'none';
+      showStatus('Creating secure payment session...');
+      const response = await fetch(`${API_BASE}/merchant/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchant_id: merchantId, amount })
+      });
       if (!response.ok) throw new Error((await response.json()).detail || 'Unable to load payment session');
-      const session = await response.json();
-      document.getElementById('amount').textContent = `Amount: ₹${Number(session.amount).toFixed(2)}`;
-      document.getElementById('qr').innerHTML = `<img src="${API_BASE}/merchant/session/${sessionId}/qr" alt="Secure KavachQR payment QR">`;
-      timer = setInterval(() => {
-        const seconds = Math.max(0, Math.floor((new Date(session.expires_at).getTime() - Date.now()) / 1000));
+      displaySession(await response.json());
+    }
+
+    function startCountdown() {
+      clearInterval(countdownTimer);
+      const tick = () => {
+        const seconds = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
         document.getElementById('window').textContent = `Security Window: ${seconds} seconds`;
-        if (!seconds) { clearInterval(timer); followNextSession().catch(showError); }
-      }, 1000);
+        if (seconds === 0) rotateSession();
+      };
+      tick();
+      countdownTimer = setInterval(tick, 1000);
     }
-    async function followNextSession() {
-      const response = await fetch(`${API_BASE}/customer/session/${encodeURIComponent(sessionId)}/next`);
-      if (!response.ok) throw new Error('Waiting for the merchant dashboard to create a new session.');
-      const next = await response.json();
-      sessionId = next.session_id;
-      history.replaceState(null, '', `?session_id=${encodeURIComponent(sessionId)}`);
-      await loadSession();
+
+    let rotating = false;
+    async function rotateSession() {
+      if (rotating) return;
+      rotating = true;
+      clearInterval(countdownTimer);
+      try { await createSession(); } catch (error) { showError(error); }
+      finally { rotating = false; }
     }
-    function showError(error) { document.getElementById('status').textContent = error.message; document.getElementById('status').className = 'alert'; }
-    loadSession().catch(showError);
+
+    function connectSocket() {
+      if (!reconnectEnabled || socketConnecting || (socket && socket.readyState <= WebSocket.OPEN)) return;
+      socketConnecting = true;
+      const protocol = API_BASE.startsWith('https') ? 'wss' : 'ws';
+      socket = new WebSocket(`${protocol}://${new URL(API_BASE).host}/ws/merchant/${encodeURIComponent(merchantId)}`);
+      socket.onopen = () => { socketConnecting = false; clearTimeout(reconnectTimer); };
+      socket.onmessage = event => {
+        const data = JSON.parse(event.data);
+        if (data.merchant_id !== merchantId) return;
+        if (data.event === 'PAYMENT_SETTLED' && data.session_id === sessionId) showStatus(`Payment Verified\n₹${Number(data.amount || requestedAmount || 50).toFixed(2)}`, 'verified');
+        if (data.event === 'SPOOF_BLOCKED' && data.session_id === sessionId) showStatus('Payment Blocked\nSecurity verification failed.', 'alert');
+        if (data.event === 'SESSION_EXPIRED' && data.session_id === sessionId) rotateSession();
+      };
+      socket.onclose = () => {
+        socketConnecting = false;
+        socket = null;
+        if (reconnectEnabled) reconnectTimer = setTimeout(connectSocket, 2000);
+      };
+      socket.onerror = () => socket.close();
+    }
+
+    function showError(error) {
+      clearInterval(countdownTimer);
+      document.getElementById('qr').innerHTML = '<span>Secure session unavailable</span>';
+      showStatus(`Unable to create secure payment session. ${error.message}`, 'alert');
+      document.getElementById('retry').style.display = 'block';
+    }
+
+    window.addEventListener('pagehide', () => {
+      reconnectEnabled = false;
+      clearTimeout(reconnectTimer);
+      clearInterval(countdownTimer);
+      if (socket) socket.close();
+    });
+    connectSocket();
+    createSession().catch(showError);
   </script>
 </body>
 </html>

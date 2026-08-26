@@ -175,7 +175,7 @@ def session_view(session, include_internal=True):
 async def broadcast(merchant_id, event, session, **extra):
     payload = {"event": event, "session_id": session.get("session_id"),
                "merchant_id": merchant_id, "status": session.get("status"),
-               "timestamp": int(time.time()), **extra}
+               "amount": session.get("amount"), "timestamp": int(time.time()), **extra}
     for connection in list(merchant_connections.get(merchant_id, set())):
         try:
             await connection.send_json(payload)
@@ -669,7 +669,7 @@ def seed_agent_demo():
 
 @app.websocket("/ws/merchant/{merchant_id}")
 async def merchant_websocket(websocket: WebSocket, merchant_id: str):
-    if merchant_id not in merchants:
+    if merchant_id not in merchants or merchants[merchant_id]["verification_status"] != "VERIFIED":
         await websocket.close(code=1008)
         return
     await websocket.accept()
